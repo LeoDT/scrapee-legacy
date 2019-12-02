@@ -1,7 +1,7 @@
 import { app, BrowserWindow, screen } from 'electron';
 import * as path from 'path';
-import * as net from 'net';
-import * as fs from 'fs';
+
+import { server as localMessageServer } from './localMessageServer';
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -18,20 +18,6 @@ async function installExtensions(): Promise<unknown> {
     extensions.map(name => installer.default(installer[name], forceDownload))
   ).catch(console.log);
 }
-
-const localMessageServer = net.createServer(stream => {
-  stream.on('data', c => {
-    console.log(`on data: ${c.toString()}`);
-    stream.write(JSON.stringify({ response: 1 }));
-    stream.end();
-  });
-
-  stream.on('end', () => {
-    console.log(`on end`);
-  });
-});
-
-localMessageServer.listen('/tmp/scrapee.sock');
 
 app.on('ready', async () => {
   if (process.env.NODE_ENV === 'development') {
@@ -76,7 +62,6 @@ app.on('ready', async () => {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
-    fs.unlinkSync('/tmp/scrapee.sock');
     localMessageServer.close();
   });
 });
