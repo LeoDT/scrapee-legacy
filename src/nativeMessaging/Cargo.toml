@@ -1,0 +1,14 @@
+[package]
+name = "nativeMessaging"
+version = "0.1.0"
+authors = ["LeoDT <leojoy710@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+log = "0.4"
+fern = "0.5"
+chrono = "0.4"
+
+[[bin]]
+name = "nativeMessaging"
+path = "main.rs"

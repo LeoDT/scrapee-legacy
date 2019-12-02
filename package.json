@@ -1,0 +1,47 @@
+{
+  "name": "scrapee",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "git@github.com:LeoDT/scrapee.git",
+  "author": "LeoDT <leojoy710@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@hot-loader/react-dom": "^16.11.0",
+    "fs-extra": "^8.1.0",
+    "normalize.css": "^8.0.1",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.91",
+    "@types/react": "^16.9.13",
+    "@types/react-dom": "^16.9.4",
+    "@types/webpack-env": "^1.14.1",
+    "@typescript-eslint/eslint-plugin": "^2.9.0",
+    "@typescript-eslint/parser": "^2.9.0",
+    "concurrently": "^5.0.0",
+    "devtron": "^1.4.0",
+    "electron": "^7.1.2",
+    "electron-debug": "^3.0.1",
+    "electron-devtools-installer": "^2.2.4",
+    "eslint": "^6.7.1",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-plugin-react": "^7.16.0",
+    "parcel-bundler": "^1.12.4",
+    "react-hot-loader": "^4.12.18",
+    "sass": "^1.23.7",
+    "typescript": "^3.7.2"
+  },
+  "scripts": {
+    "watch-all": "concurrently 'yarn run watch-main' 'yarn run watch-renderer' 'yarn run watch-extension-chrome'",
+    "watch-main": "parcel watch src/desktop-app/main.ts -d dist/desktop-app/ --target=electron --no-cache --log-level 0",
+    "watch-renderer": "parcel src/desktop-app/index.html -d dist/desktop-app/",
+    "watch-extension-chrome": "node ./scripts/dev-extension-chrome.js",
+    "start": "NODE_ENV=development electron dist/desktop-app/main.js"
+  },
+  "alias": {
+    "shared": "./src/shared",
+    "react-dom": "@hot-loader/react-dom"
+  }
+}

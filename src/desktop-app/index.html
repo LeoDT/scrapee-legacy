@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>App</title>
+    <style>
+      .default-app-drag-region {
+        -webkit-app-region: drag;
+        min-height: 30px;
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="default-app-drag-region"></div>
+    <div id="app"></div>
+
+    <script src="./renderer.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "com.leodt.scrapee",
+  "description": "Scrapee",
+  "path": "/Users/leodt/src/scrapee/src/nativeMessaging/target/debug/nativeMessaging",
+  "type": "stdio",
+  "allowed_origins": ["chrome-extension://lcpbaabeedkhacpojknpmbdignbmkkhg/"]
+}

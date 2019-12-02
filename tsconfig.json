@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react",
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "target": "es6",
+    "baseUrl": "./src",
+    "outDir": "./dist",
+    "paths": {
+      "shared": ["./shared"]
+    }
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["./scripts"]
+}
