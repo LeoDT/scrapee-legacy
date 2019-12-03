@@ -1,3 +1,5 @@
+import './hot-reload';
+
 chrome.runtime.onInstalled.addListener(function() {
   chrome.contextMenus.create({
     id: 'sendToScrapee',
@@ -31,5 +33,11 @@ chrome.contextMenus.onClicked.addListener(function(obj) {
         timestamp: Date.now()
       });
     }
+  }
+});
+
+chrome.browserAction.onClicked.addListener(tab => {
+  if (tab && tab.id) {
+    chrome.tabs.sendMessage(tab.id, { name: 'toggle-inspector' });
   }
 });

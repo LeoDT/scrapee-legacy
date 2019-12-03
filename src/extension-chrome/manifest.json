@@ -7,5 +7,12 @@
     "scripts": ["background.js"],
     "persistent": false
   },
-  "permissions": ["http://*/*", "https://*/*", "contextMenus", "nativeMessaging"]
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "browser_action": {},
+  "permissions": ["http://*/*", "https://*/*", "contextMenus", "nativeMessaging", "management"]
 }

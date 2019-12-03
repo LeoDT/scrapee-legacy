@@ -7,7 +7,7 @@ const filesToCopy = [
   'src/extension-chrome/manifest.json',
   'src/extension-chrome/nativeMessageManifest.json'
 ];
-const entry = ['src/extension-chrome/background.ts'];
+const entry = ['src/extension-chrome/background.ts', 'src/extension-chrome/content.ts'];
 
 fs.ensureDirSync(dist);
 
