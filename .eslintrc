@@ -36,6 +36,8 @@
     "@typescript-eslint/array-type": ["error", { "default": "array-simple" }],
     "@typescript-eslint/explicit-function-return-type": ["error", { "allowExpressions": true }],
     "@typescript-eslint/no-use-before-define": ["error", { "functions": false }],
-    "@typescript-eslint/no-var-requires": ["off"]
+    "@typescript-eslint/no-var-requires": ["off"],
+    "@typescript-eslint/no-empty-interface": ["off"],
+    "@typescript-eslint/interface-name-prefix": ["off"]
   }
 }

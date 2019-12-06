@@ -41,15 +41,17 @@ export class DOMInspector {
   }
 
   handleMouseMove = throttle((e: MouseEvent): void => {
-    const el = this.doc.elementFromPoint(e.x, e.y) as HTMLElement;
+    const els = this.doc.elementsFromPoint(e.x, e.y) as HTMLElement[];
 
-    if (el && this.focused !== el && !this.isMaskEl(el)) {
+    const el = els.find(e => !this.isMaskEl(e));
+
+    if (el && this.focused !== el) {
       this.setFocus(el);
     }
-  }, 60);
+  }, 33);
 
   isMaskEl(el: HTMLElement): boolean {
-    return Boolean(el.dataset['scrapee-mask']);
+    return Boolean(el.dataset.scrapeeMask);
   }
 
   setFocus(el: HTMLElement): void {
@@ -66,8 +68,7 @@ export class DOMInspector {
       backgroundColor: '#333',
       border: '1px solid #000',
       opacity: 0.3,
-      zIndex: 999999,
-      pointerEvents: 'none'
+      zIndex: 999999
     });
 
     this.maskRoot.appendChild(mask);

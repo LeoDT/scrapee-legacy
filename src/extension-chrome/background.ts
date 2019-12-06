@@ -1,4 +1,5 @@
 import './hot-reload';
+import { nativeRequest } from './nativeRequest';
 
 chrome.runtime.onInstalled.addListener(function() {
   chrome.contextMenus.create({
@@ -21,6 +22,16 @@ function initPort(): void {
   });
 }
 
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.type === 'nativeRequest') {
+    nativeRequest(msg.resource, msg.body).then(response => {
+      sendResponse(response);
+    });
+
+    return true;
+  }
+});
+
 chrome.contextMenus.onClicked.addListener(function(obj) {
   if (obj.menuItemId === 'sendToScrapee') {
     if (!port) initPort();
@@ -38,6 +49,6 @@ chrome.contextMenus.onClicked.addListener(function(obj) {
 
 chrome.browserAction.onClicked.addListener(tab => {
   if (tab && tab.id) {
-    chrome.tabs.sendMessage(tab.id, { name: 'toggle-inspector' });
+    chrome.tabs.sendMessage(tab.id, { name: 'toggle-clipper' });
   }
 });

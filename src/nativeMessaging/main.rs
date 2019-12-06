@@ -1,29 +1,29 @@
+use log::{debug, info};
 use std::io;
+use std::io::Read;
+use std::io::Write;
+use std::os::unix::net::UnixStream;
 use std::sync::mpsc;
 use std::sync::mpsc::Receiver;
 use std::sync::mpsc::TryRecvError;
-use std::{thread, time};
-use std::os::unix::net::UnixStream;
-use std::io::Write;
-use std::io::Read;
-use log::{debug};
 use std::time::Duration;
+use std::{thread, time};
 
 fn setup_logger() -> Result<(), fern::InitError> {
-    fern::Dispatch::new()
-        .format(|out, message, record| {
-            out.finish(format_args!(
-                "{}[{}][{}] {}",
-                chrono::Local::now().format("[%Y-%m-%d][%H:%M:%S]"),
-                record.target(),
-                record.level(),
-                message
-            ))
-        })
-        .level(log::LevelFilter::Debug)
-        .chain(fern::log_file("/Users/leodt/output.log")?)
-        .apply()?;
-    Ok(())
+  fern::Dispatch::new()
+    .format(|out, message, record| {
+      out.finish(format_args!(
+        "{}[{}][{}] {}",
+        chrono::Local::now().format("[%Y-%m-%d][%H:%M:%S]"),
+        record.target(),
+        record.level(),
+        message
+      ))
+    })
+    .level(log::LevelFilter::Info)
+    .chain(fern::log_file("/Users/leodt/output.log")?)
+    .apply()?;
+  Ok(())
 }
 
 fn main() {
@@ -62,8 +62,8 @@ fn spawn_receive_channel() -> Receiver<String> {
 }
 
 fn sleep(millis: u64) {
-    let duration = time::Duration::from_millis(millis);
-    thread::sleep(duration);
+  let duration = time::Duration::from_millis(millis);
+  thread::sleep(duration);
 }
 
 fn send_to_chrome(msg: String) {
@@ -76,24 +76,26 @@ fn send_to_chrome(msg: String) {
 }
 
 fn send_to_native(msg: String) {
-  debug!("send to native: {}", msg);
+  info!("send to native: {}", msg);
   let mut stream = UnixStream::connect("/tmp/scrapee.sock").unwrap();
 
   stream.write_all(msg.as_bytes()).unwrap();
   stream.flush();
 
-  debug!("sended");
+  info!("sended");
 
-  stream.set_read_timeout(Some(Duration::from_millis(1500))).unwrap();
+  stream
+    .set_read_timeout(Some(Duration::from_millis(1500)))
+    .unwrap();
 
   let mut response = String::new();
   match stream.read_to_string(&mut response) {
     Ok(_) => {
-      debug!("response {:?}", response);
+      info!("response {:?}", response);
       send_to_chrome(response);
-    },
+    }
     Err(_) => {
-      debug!("response timeout");
+      info!("response timeout");
       send_to_chrome(String::from("{}"));
     }
   };
