@@ -6,8 +6,10 @@ import { Store } from './store';
 import { StoreContext } from './context';
 import { DOMClipperApi } from './api';
 
-export function mount(root: HTMLDivElement, api: DOMClipperApi): void {
+export async function mount(root: HTMLDivElement, api: DOMClipperApi): Promise<void> {
   const store = new Store(api);
+
+  await store.initApi();
 
   store.loadBuckets();
 

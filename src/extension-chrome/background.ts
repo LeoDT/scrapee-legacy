@@ -24,9 +24,14 @@ function initPort(): void {
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'nativeRequest') {
-    nativeRequest(msg.resource, msg.body).then(response => {
-      sendResponse(response);
-    });
+    nativeRequest(msg.resource, msg.body).then(
+      response => {
+        sendResponse(response);
+      },
+      e => {
+        sendResponse({ error: true, errorName: e.name, errorMessage: e.message });
+      }
+    );
 
     return true;
   }

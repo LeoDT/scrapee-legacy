@@ -10,6 +10,10 @@ const server = net.createServer(stream => {
     const request = JSON.parse(s);
 
     if (request.type === 'request') {
+      if (request.resource === 'init') {
+        stream.write(JSON.stringify({ type: 'response', requestId: request.requestId, body: {} }));
+      }
+
       if (request.resource === 'buckets') {
         stream.write(
           JSON.stringify({

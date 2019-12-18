@@ -77,7 +77,14 @@ fn send_to_chrome(msg: String) {
 
 fn send_to_native(msg: String) {
   info!("send to native: {}", msg);
-  let mut stream = UnixStream::connect("/tmp/scrapee.sock").unwrap();
+  let mut stream = match UnixStream::connect("/tmp/scrapee.sock") {
+    Ok(s) => s,
+    Err(_) => {
+      info!("native not started");
+      send_to_chrome(msg); // TODO: should generate meaningful error
+      panic!("native not started");
+    }
+  };
 
   stream.write_all(msg.as_bytes()).unwrap();
   stream.flush();

@@ -24,11 +24,16 @@ const sentRequests = new Map<
 >();
 
 function handleMessage(msg: Response): void {
-  if (msg.type === 'response') {
-    const request = sentRequests.get(msg.requestId);
+  const request = sentRequests.get(msg.requestId);
 
+  if (msg.type === 'response') {
     if (request) {
       request.resolve(msg.body);
+    }
+  } else if (msg.type === 'request') {
+    // TODO: connection error
+    if (request) {
+      request.reject(Error('connection error'));
     }
   }
 }
@@ -67,7 +72,3 @@ export async function nativeRequest(
     });
   });
 }
-
-export const api = {
-  loadBuckets: () => nativeRequest('buckets')
-};

@@ -21,6 +21,10 @@ export class Store {
     return Boolean(hit);
   }
 
+  initApi(): Promise<{}> {
+    return this.api.init();
+  }
+
   async loadBuckets(): Promise<PlainObject> {
     const res = await this.api.loadBuckets();
 
