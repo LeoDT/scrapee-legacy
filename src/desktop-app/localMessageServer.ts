@@ -1,8 +1,11 @@
 import * as fs from 'fs';
 import * as net from 'net';
 
+import { readRootBucket } from './db';
+import { getChildBuckets } from '../shared/models/Bucket';
+
 const server = net.createServer(stream => {
-  stream.on('data', buffer => {
+  stream.on('data', async buffer => {
     const s = buffer.toString();
 
     console.log(`on data: ${s}`);
@@ -15,21 +18,14 @@ const server = net.createServer(stream => {
       }
 
       if (request.resource === 'buckets') {
+        const root = await readRootBucket();
+
         stream.write(
           JSON.stringify({
             type: 'response',
             requestId: request.requestId,
             body: {
-              buckets: [
-                {
-                  id: '1',
-                  name: '1111'
-                },
-                {
-                  id: '2',
-                  name: '2222'
-                }
-              ]
+              buckets: getChildBuckets(root)
             }
           })
         );

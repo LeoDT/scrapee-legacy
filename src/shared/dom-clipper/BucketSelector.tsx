@@ -16,7 +16,7 @@ export default function BucketSelector(): JSX.Element {
   return useObserver(() => (
     <select onChange={handleChange}>
       {store.buckets.map(b => (
-        <option value={b.id} key={b.id}>
+        <option value={b.path} key={b.path}>
           {b.name}
         </option>
       ))}

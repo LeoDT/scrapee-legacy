@@ -1,9 +1,14 @@
-import uuid from 'shared/utils/uuid';
+import uuid from '../../shared/utils/uuid';
 
 export type ScrapType = 'text' | 'file';
 export type ScrapSource = 'web-clipper';
 
-export interface Scrap {
+export interface ScrapContent {
+  key: string;
+  value: string;
+}
+
+export class Scrap {
   id: string;
   name?: string;
 
@@ -12,15 +17,14 @@ export interface Scrap {
 
   url?: URL;
   originalHTML?: string;
-  content: string;
-}
+  content: ScrapContent[];
 
-export function makeScrap(name = '', type: ScrapType = 'text'): Scrap {
-  return {
-    id: uuid.new(),
-    name,
-    type,
+  constructor(name = '', type: ScrapType = 'text') {
+    this.name = name;
+    this.type = type;
 
-    content: ''
-  };
+    this.id = uuid.new();
+
+    this.content = [];
+  }
 }

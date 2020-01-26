@@ -1,16 +1,19 @@
-import { Scrap, makeScrap } from './Scrap';
+import { Scrap } from './Scrap';
 
-export interface Bucket extends Scrap {
+export class Bucket {
+  path: string;
   name: string;
-  children: Scrap[];
+
+  children: Array<Bucket | Scrap>;
+
+  constructor(path: string, name = 'New Bucket') {
+    this.path = path;
+    this.name = name;
+
+    this.children = [];
+  }
 }
 
-export function makeBucket(name = 'New Bucket'): Bucket {
-  const scrap = makeScrap();
-  return {
-    ...scrap,
-
-    name,
-    children: []
-  };
+export function getChildBuckets(bucket: Bucket): Bucket[] {
+  return bucket.children.filter((c): c is Bucket => c instanceof Bucket);
 }

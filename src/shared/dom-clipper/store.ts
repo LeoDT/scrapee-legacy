@@ -13,8 +13,8 @@ export class Store {
     this.api = api;
   }
 
-  selectBucketWithId(id: string): boolean {
-    const hit = this.buckets.find(b => b.id === id);
+  selectBucketWithId(path: string): boolean {
+    const hit = this.buckets.find(b => b.path === path);
 
     if (hit) this.selectedBucket = hit;
 
