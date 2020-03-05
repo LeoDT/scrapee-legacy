@@ -1,4 +1,4 @@
-const Bundler = require('parcel-bundler');
+/* const Bundler = require('parcel-bundler'); */
 const path = require('path');
 const fs = require('fs-extra');
 
@@ -16,11 +16,11 @@ filesToCopy.forEach(f => {
   fs.ensureSymlinkSync(file, path.resolve(dist, path.basename(f)));
 });
 
-const bundler = new Bundler(entry, {
+/* const bundler = new Bundler(entry, {
   outDir: dist,
   contentHash: false,
   autoInstall: false,
   hmr: false
 });
 
-bundler.bundle();
+bundler.bundle(); */
