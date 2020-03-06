@@ -28,7 +28,13 @@ export async function readBucket(path: string): Promise<Array<Bucket | Scrap>> {
           const direntPath = resolve(fullPath, de.name);
 
           if (de.isDirectory()) {
-            return Promise.resolve(new Bucket(direntPath, de.name));
+            const b = new Bucket(direntPath, de.name);
+
+            readBucket(b.path).then(children => {
+              b.children.replace(children);
+            });
+
+            return Promise.resolve(b);
           }
 
           if (de.isFile()) {
@@ -40,14 +46,16 @@ export async function readBucket(path: string): Promise<Array<Bucket | Scrap>> {
         .filter((e): e is Promise<Bucket> | Promise<Scrap> => e !== null)
     );
   } catch (e) {
+    console.log(e);
+
     return [];
   }
 }
 
 export async function readRootBucket(): Promise<Bucket> {
-  const rootBucket = new Bucket(bucketsRoot);
+  const rootBucket = new Bucket(bucketsRoot, 'ROOT');
 
-  rootBucket.children = await readBucket(bucketsRoot);
+  rootBucket.children.replace(await readBucket(bucketsRoot));
 
   return rootBucket;
 }

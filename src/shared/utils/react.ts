@@ -5,7 +5,11 @@ export function createContextNoNullCheck<T>(defaults?: T): [() => T, React.Conte
 
   function useContext(): T {
     const c = React.useContext(context);
-    if (!c) throw new Error('useContext must be inside a Provider with a value');
+
+    if (typeof c === 'undefined') {
+      throw new Error('useContext must be inside a Provider with a value');
+    }
+
     return c;
   }
 

@@ -1,16 +1,32 @@
 {
   "compilerOptions": {
-    "strict": true,
+    "target": "ES2018",
+    "module": "CommonJS",
+    "lib": ["dom", "esnext"],
+    "declaration": true,
+    "declarationMap": true,
+    "noEmit": true,
     "jsx": "react",
-    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "pretty": true,
+    "sourceMap": true,
+    /* Additional Checks */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    /* Module Resolution Options */
     "moduleResolution": "node",
-    "target": "ES2020",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "allowJs": true,
+
     "baseUrl": "./src",
-    "outDir": "./dist",
     "paths": {
-      "shared": ["./shared"]
+      "shared": ["./src/shared"]
     }
   },
   "include": ["./src/**/*"],
-  "exclude": ["./scripts", "./postcss.config.js"]
+  "exclude": ["./scripts", "./postcss.config.js", "./tailwind.config.js"]
 }

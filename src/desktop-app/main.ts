@@ -30,8 +30,8 @@ app.on('ready', async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    width: 1200,
+    height: 760,
     x: externalDisplay ? externalDisplay.bounds.x + 50 : undefined,
     y: externalDisplay ? externalDisplay.bounds.y + 50 : undefined,
     titleBarStyle: 'hidden',
@@ -42,7 +42,7 @@ app.on('ready', async () => {
 
   mainWindow.loadURL(
     process.env.NODE_ENV === 'development'
-      ? 'http://localhost:1234/index.html'
+      ? 'http://localhost:1234/'
       : `file://${path.join(__dirname, 'index.html')}`
   );
 

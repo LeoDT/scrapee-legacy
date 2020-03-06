@@ -4,14 +4,6 @@
     "browser": true,
     "es6": true
   },
-  "parserOptions": {
-    "project": "./tsconfig.json",
-    "sourceType": "module",
-    "ecmaVersion": 2019,
-    "ecmaFeatures": {
-      "jsx": true
-    }
-  },
   "plugins": ["react", "@typescript-eslint"],
   "settings": {
     "react": {

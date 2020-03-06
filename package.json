@@ -13,21 +13,33 @@
     "lodash": "^4.17.15",
     "mobx": "^5.15.4",
     "mobx-react-lite": "^1.5.1",
-    "normalize.css": "^8.0.1",
     "react": "^16.13.0",
-    "react-dom": "^16.13.0",
+    "react-dom": "npm:@hot-loader/react-dom",
+    "react-router-dom": "^5.1.2",
     "short-uuid": "^3.1.1",
     "tailwindcss": "^1.2.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.8.7",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-optional-chaining": "^7.8.3",
+    "@babel/preset-env": "^7.8.7",
+    "@babel/preset-react": "^7.8.3",
+    "@babel/preset-typescript": "^7.8.3",
+    "@babel/register": "^7.8.6",
     "@types/chrome": "^0.0.98",
     "@types/lodash": "^4.14.149",
     "@types/react": "^16.9.23",
     "@types/react-dom": "^16.9.4",
+    "@types/react-router-dom": "^5.1.3",
     "@types/webpack-env": "^1.15.1",
     "@typescript-eslint/eslint-plugin": "^2.22.0",
     "@typescript-eslint/parser": "^2.22.0",
+    "autoprefixer": "^9.7.4",
+    "babel-loader": "^8.0.6",
     "concurrently": "^5.1.0",
+    "cross-env": "^7.0.1",
+    "css-loader": "^3.4.2",
     "devtron": "^1.4.0",
     "electron": "^8.0.3",
     "electron-debug": "^3.0.1",
@@ -35,17 +47,32 @@
     "eslint": "^6.7.1",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-react": "^7.18.3",
-    "parcel": "^2.0.0-alpha.3.2",
+    "html-webpack-plugin": "^3.2.0",
+    "postcss-import": "^12.0.1",
+    "postcss-loader": "^3.0.0",
+    "postcss-nested": "^4.2.1",
+    "prettier": "^1.19.1",
     "react-hot-loader": "^4.12.18",
-    "typescript": "^3.8.3"
+    "style-loader": "^1.1.3",
+    "svg-react-loader": "^0.4.6",
+    "svgo": "^1.3.2",
+    "svgo-loader": "^2.2.1",
+    "terser-webpack-plugin": "^2.3.5",
+    "typescript": "^3.8.3",
+    "url-loader": "^3.0.0",
+    "webpack": "^4.42.0",
+    "webpack-bundle-analyzer": "^3.6.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3",
+    "webpack-merge": "^4.2.2"
   },
   "scripts": {
-    "watch-all": "concurrently 'yarn run watch-main' 'yarn run watch-renderer'",
-    "watch-main": "parcel watch src/desktop-app/main.ts --target=desktop-app-main --no-cache --log-level 0",
-    "watch-renderer": "parcel src/desktop-app/index.html --target=desktop-app-renderer",
+    "build-main": "cross-env NODE_ENV=development webpack --config scripts/webpack.config.main.babel.js",
+    "dev-renderer": "cross-env NODE_ENV=development webpack-dev-server --config scripts/webpack.config.renderer.dev.babel.js",
+    "dev-main": "cross-env ELECTRON_DISABLE_SECURITY_WARNINGS=1 NODE_ENV=development electron -r ./scripts/BabelRegister ./src/desktop-app/main.ts",
     "watch-extension-chrome-background": "parcel watch src/extension-chrome/background.ts --target=extension-chrome-background",
     "watch-extension-chrome-content": "parcel watch src/extension-chrome/content.ts --target=extension-chrome-content",
-    "start": "NODE_ENV=development electron dist/desktop-app/main.js"
+    "start": "cross-env ELECTRON_DISABLE_SECURITY_WARNINGS=1 NODE_ENV=development electron dist/desktop-app/main.js"
   },
   "alias": {
     "shared": "./src/shared",
@@ -53,23 +80,5 @@
   },
   "browserslist": [
     "last 1 Chrome versions"
-  ],
-  "desktop-app-main": "dist/desktop-app/main.js",
-  "desktop-app-renderer": "dist/desktop-app/index.html",
-  "extension-chrome-background": "dist/extension-chrome/background.js",
-  "extension-chrome-content": "dist/extension-chrome/content.js",
-  "targets": {
-    "desktop-app-renderer": {
-      "context": "electron-renderer"
-    },
-    "desktop-app-main": {
-      "context": "electron-main"
-    },
-    "extension-chrome-background": {
-      "context": "browser"
-    },
-    "extension-chrome-content": {
-      "context": "browser"
-    }
-  }
+  ]
 }
