@@ -30,8 +30,19 @@ export class Store {
 
     if (res.buckets) {
       this.buckets.replace(res.buckets);
+      this.selectedBucket = res.buckets[0];
     }
 
     return res;
+  }
+
+  async saveScrap(els: HTMLElement[]): Promise<PlainObject> {
+    const text = els.map(e => e.textContent).join('\n');
+
+    if (this.selectedBucket) {
+      return this.api.saveScrap({ bucketId: this.selectedBucket.path, text });
+    }
+
+    return {};
   }
 }

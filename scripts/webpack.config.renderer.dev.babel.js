@@ -26,26 +26,6 @@ export default merge.smart(baseConfig, {
     filename: '[name].[hash].js'
   },
 
-  module: {
-    rules: [
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'postcss-loader']
-      },
-      {
-        test: /\.svg$/,
-        exclude: /node_modules/,
-        use: ['svg-react-loader', 'svgo-loader']
-      }
-    ]
-  },
-
-  resolve: {
-    alias: {
-      shared: path.resolve(__dirname, '..', 'src', 'shared')
-    }
-  },
-
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
 

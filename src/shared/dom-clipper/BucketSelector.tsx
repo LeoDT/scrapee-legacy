@@ -1,5 +1,7 @@
 import * as React from 'react';
-import { useObserver } from 'mobx-react-lite';
+import { Observer } from 'mobx-react-lite';
+
+import Select from 'shared/components/Select';
 
 import { useStore } from './context';
 
@@ -13,13 +15,14 @@ export default function BucketSelector(): JSX.Element {
     store.loadBuckets();
   }, []);
 
-  return useObserver(() => (
-    <select onChange={handleChange}>
-      {store.buckets.map(b => (
-        <option value={b.path} key={b.path}>
-          {b.name}
-        </option>
-      ))}
-    </select>
-  ));
+  return (
+    <Observer>
+      {() => (
+        <Select
+          options={store.buckets.map(b => ({ text: b.name, value: b.path }))}
+          onChange={handleChange}
+        />
+      )}
+    </Observer>
+  );
 }

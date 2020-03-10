@@ -23,5 +23,6 @@ function request(resource: string, body?: PlainObject): Promise<PlainObject> {
 
 export const api = {
   init: () => request('init'),
-  loadBuckets: () => request('buckets')
+  loadBuckets: () => request('buckets'),
+  saveScrap: body => request('saveScrap', body)
 } as DOMClipperApi;

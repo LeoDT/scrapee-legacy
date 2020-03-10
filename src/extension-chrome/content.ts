@@ -1,4 +1,4 @@
-import { mount, unmount } from 'shared/dom-clipper/index';
+import { mount, unmount } from 'shared/dom-clipper';
 
 import { api } from './api';
 

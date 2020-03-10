@@ -1,17 +1,5 @@
 import uuid from 'shared/utils/uuid';
-
-interface Request {
-  type: 'request';
-  requestId: string;
-  resource: string;
-  body: PlainObject;
-}
-
-interface Response {
-  type: 'response';
-  requestId: string;
-  body: PlainObject;
-}
+import { Request, Resource, Response } from 'shared/utils/localMessage';
 
 let port: chrome.runtime.Port | null;
 const sentRequests = new Map<
@@ -50,7 +38,7 @@ function initPort(): chrome.runtime.Port {
 }
 
 export async function nativeRequest(
-  resource: string,
+  resource: Resource,
   body: PlainObject = {}
 ): Promise<PlainObject> {
   if (!port) port = initPort();

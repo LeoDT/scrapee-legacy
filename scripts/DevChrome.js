@@ -1,13 +1,17 @@
-/* const Bundler = require('parcel-bundler'); */
+/* eslint @typescript-eslint/no-empty-function: 0 */
+
+require('./BabelRegister');
+
 const path = require('path');
 const fs = require('fs-extra');
+const webpack = require('webpack');
+const webpackConfig = require('./webpack.config.chrome.dev.babel').default;
 
 const dist = path.resolve(__dirname, '../', 'dist/extension-chrome/');
 const filesToCopy = [
   'src/extension-chrome/manifest.json',
   'src/extension-chrome/nativeMessageManifest.json'
 ];
-const entry = ['src/extension-chrome/background.ts', 'src/extension-chrome/content.ts'];
 
 fs.ensureDirSync(dist);
 
@@ -16,11 +20,10 @@ filesToCopy.forEach(f => {
   fs.ensureSymlinkSync(file, path.resolve(dist, path.basename(f)));
 });
 
-/* const bundler = new Bundler(entry, {
-  outDir: dist,
-  contentHash: false,
-  autoInstall: false,
-  hmr: false
-});
-
-bundler.bundle(); */
+webpack(webpackConfig).watch(
+  {
+    aggregateTimeout: 300,
+    poll: undefined
+  },
+  () => {}
+);

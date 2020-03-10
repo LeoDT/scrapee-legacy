@@ -1,6 +1,14 @@
 import throttle from 'lodash/throttle';
+import mitt from 'mitt';
+
+interface DOMInspectorOptions {
+  ignoreRoots?: HTMLElement[];
+}
 
 export class DOMInspector {
+  emitter: mitt.Emitter;
+  options: DOMInspectorOptions;
+
   doc: Document;
 
   maskRoot: HTMLDivElement;
@@ -8,14 +16,17 @@ export class DOMInspector {
 
   focused: HTMLElement | null = null;
 
-  constructor(root: Document) {
+  constructor(root: Document, options: DOMInspectorOptions = {}) {
+    this.emitter = mitt();
+    this.options = options;
+
     this.doc = root;
 
     this.maskRoot = root.createElement('div');
     this.maskRoot.setAttribute('id', 'scrapee-mask-root');
     Object.assign(this.maskRoot.style, {
       position: 'fixed',
-      zIndex: 99999,
+      zIndex: 2147483637 - 1,
       top: 0,
       left: 0
     });
@@ -23,27 +34,41 @@ export class DOMInspector {
     this.focusMask = this.generateMask();
   }
 
+  get mounted(): boolean {
+    return this.doc.body.contains(this.maskRoot);
+  }
+
   mount(): void {
-    if (this.doc.body) {
+    if (!this.mounted) {
       this.doc.body.appendChild(this.maskRoot);
     }
 
     document.addEventListener('mousemove', this.handleMouseMove);
+    this.focusMask.addEventListener('click', this.handleClick);
   }
 
   unmount(): void {
-    if (this.doc.body) {
+    if (this.mounted) {
       this.focusMask.style.height = '0px';
       this.doc.body.removeChild(this.maskRoot);
     }
 
     document.removeEventListener('mousemove', this.handleMouseMove);
+    this.focusMask.removeEventListener('click', this.handleClick);
   }
+
+  updateOptions(options: DOMInspectorOptions): void {
+    this.options = options;
+  }
+
+  handleClick = (): void => {
+    this.emitter.emit('select', this.focused);
+  };
 
   handleMouseMove = throttle((e: MouseEvent): void => {
     const els = this.doc.elementsFromPoint(e.x, e.y) as HTMLElement[];
 
-    const el = els.find(e => !this.isMaskEl(e));
+    const el = els.find(e => !this.isMaskEl(e) && !this.isIgnored(e));
 
     if (el && this.focused !== el) {
       this.setFocus(el);
@@ -52,6 +77,14 @@ export class DOMInspector {
 
   isMaskEl(el: HTMLElement): boolean {
     return Boolean(el.dataset.scrapeeMask);
+  }
+
+  isIgnored(el: HTMLElement): boolean {
+    if (this.options.ignoreRoots) {
+      return this.options.ignoreRoots.some(ignore => ignore.contains(el) || ignore === el);
+    }
+
+    return false;
   }
 
   setFocus(el: HTMLElement): void {

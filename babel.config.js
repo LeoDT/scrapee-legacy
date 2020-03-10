@@ -7,6 +7,7 @@ module.exports = {
   plugins: [
     require('react-hot-loader/babel'),
     [require('@babel/plugin-proposal-class-properties'), { loose: true }],
-    require('@babel/plugin-proposal-optional-chaining')
+    require('@babel/plugin-proposal-optional-chaining'),
+    require('@babel/plugin-proposal-nullish-coalescing-operator')
   ]
 };

@@ -16,6 +16,19 @@ export default {
             cacheDirectory: true
           }
         }
+      },
+      {
+        test: /\.string\.css$/,
+        use: ['to-string-loader', 'css-loader', 'postcss-loader']
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'postcss-loader']
+      },
+      {
+        test: /\.svg$/,
+        exclude: /node_modules/,
+        use: ['svg-react-loader', 'svgo-loader']
       }
     ]
   },
@@ -27,7 +40,9 @@ export default {
 
   resolve: {
     extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
-    modules: [path.join(__dirname, '..', 'app'), 'node_modules']
+    alias: {
+      shared: path.resolve(__dirname, '..', 'src', 'shared')
+    }
   },
 
   plugins: [

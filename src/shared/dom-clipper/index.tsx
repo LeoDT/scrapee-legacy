@@ -15,7 +15,7 @@ export async function mount(root: HTMLDivElement, api: DOMClipperApi): Promise<v
 
   render(
     <StoreContext.Provider value={store}>
-      <Clipper />
+      <Clipper ignoreRoot={root} />
     </StoreContext.Provider>,
     root
   );

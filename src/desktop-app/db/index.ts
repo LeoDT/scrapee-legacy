@@ -59,3 +59,22 @@ export async function readRootBucket(): Promise<Bucket> {
 
   return rootBucket;
 }
+
+export async function saveScrap(bucketPath: string, scrap: Scrap): Promise<void> {
+  const scrapPath = resolve(bucketsRoot, bucketPath, 'scrap.json');
+
+  let file;
+  try {
+    file = await fs.readFile(scrapPath);
+  } catch (e) {
+    console.log('no scrap found, will create');
+  }
+
+  const json = file ? JSON.parse(file.toString()) : [];
+
+  json.push(scrap);
+
+  await fs.writeFile(scrapPath, JSON.stringify(json));
+
+  console.log('scrap saved');
+}

@@ -1,7 +1,7 @@
 import './hot-reload';
 import { nativeRequest } from './nativeRequest';
 
-chrome.runtime.onInstalled.addListener(function() {
+chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: 'sendToScrapee',
     title: 'Send to Scrapee',
@@ -16,13 +16,13 @@ function initPort(): void {
   port.onMessage.addListener(function(msg) {
     console.log('Received', msg);
   });
-  port.onDisconnect.addListener(function() {
+  port.onDisconnect.addListener(() => {
     console.log('Disconnected');
     port = null;
   });
 }
 
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
   if (msg.type === 'nativeRequest') {
     nativeRequest(msg.resource, msg.body).then(
       response => {
@@ -35,9 +35,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     return true;
   }
+
+  return false;
 });
 
-chrome.contextMenus.onClicked.addListener(function(obj) {
+chrome.contextMenus.onClicked.addListener(obj => {
   if (obj.menuItemId === 'sendToScrapee') {
     if (!port) initPort();
 

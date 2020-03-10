@@ -1,0 +1,6 @@
+{
+  "watchDirs": ["src"],
+  "webpack": {
+    "overridePath": "./scripts/webpack.cosmos.override.babel.js"
+  }
+}
