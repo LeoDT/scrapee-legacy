@@ -1,4 +1,4 @@
-import throttle from 'lodash/throttle';
+import { throttle } from 'lodash';
 import mitt from 'mitt';
 
 interface DOMInspectorOptions {
@@ -23,6 +23,8 @@ export class DOMInspector {
     this.doc = root;
 
     this.maskRoot = root.createElement('div');
+    this.maskRoot.dataset.scrapeeIgnore = 'true';
+
     this.maskRoot.setAttribute('id', 'scrapee-mask-root');
     Object.assign(this.maskRoot.style, {
       position: 'fixed',
@@ -68,9 +70,9 @@ export class DOMInspector {
   handleMouseMove = throttle((e: MouseEvent): void => {
     const els = this.doc.elementsFromPoint(e.x, e.y) as HTMLElement[];
 
-    const el = els.find(e => !this.isMaskEl(e) && !this.isIgnored(e));
+    const el = els.find(e => !this.isMaskEl(e));
 
-    if (el && this.focused !== el) {
+    if (el && this.focused !== el && !this.isIgnored(el)) {
       this.setFocus(el);
     }
   }, 33);
@@ -96,6 +98,7 @@ export class DOMInspector {
     const mask = this.doc.createElement('div');
 
     mask.dataset.scrapeeMask = 'true';
+    mask.dataset.scrapeeIgnore = 'true';
 
     Object.assign(mask.style, {
       backgroundColor: '#333',

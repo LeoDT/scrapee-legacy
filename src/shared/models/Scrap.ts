@@ -5,23 +5,33 @@ export type ScrapSource = 'web-clipper';
 
 export interface ScrapContent {
   key: string | number;
+  type: ScrapType;
   value: string;
+
+  originalHTML?: string;
 }
 
 export class Scrap {
+  static fromJSON(json: PlainObject): Scrap {
+    const scrap = new Scrap(json.name as string);
+    scrap.source = json.source as ScrapSource;
+    scrap.sourceUrl = json.sourceUrl as string;
+
+    scrap.content = json.content as ScrapContent[];
+
+    return scrap;
+  }
+
   id: string;
   name?: string;
 
-  type: ScrapType;
   source?: ScrapSource;
+  sourceUrl?: string;
 
-  url?: URL;
-  originalHTML?: string;
   content: ScrapContent[];
 
-  constructor(name = '', type: ScrapType = 'text') {
+  constructor(name = '') {
     this.name = name;
-    this.type = type;
 
     this.id = uuid.new();
 
@@ -36,8 +46,13 @@ export class Scrap {
     return Math.max(0, ...numberKeys);
   }
 
-  addTextContent(value: string, key?: string): ScrapContent {
-    const content = { value, key: key ?? this.generateKeyForNewContent() };
+  addTextContent(value: string, originalHTML?: string, key?: string): ScrapContent {
+    const content: ScrapContent = {
+      type: 'text',
+      value,
+      key: key ?? this.generateKeyForNewContent(),
+      originalHTML
+    };
 
     this.content.push(content);
 

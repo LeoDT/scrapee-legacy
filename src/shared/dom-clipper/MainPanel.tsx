@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import Button from 'shared/components/Button';
 import Toggle from 'shared/components/Toggle';
+import { Dimmer, Dimmable } from 'shared/components/Dimmer';
 
 import { useDOMInspector, useStore } from './context';
 
@@ -13,32 +14,30 @@ export default function MainPanel(): JSX.Element {
   const inspector = useDOMInspector();
   const [selectedEls, setSelectedEls] = React.useState<HTMLElement[]>([]);
   const [inspectorEnabled, setInspectorEnabled] = React.useState(true);
+  const [saving, setSaving] = React.useState(false);
   const onSelect = React.useCallback((el: HTMLElement): void => {
     setSelectedEls(els => [...els, el]);
   }, []);
 
   React.useEffect(() => {
-    inspector.emitter.on('select', onSelect);
-
-    return () => {
-      inspector.emitter.off('select', onSelect);
-    };
-  }, [inspector, onSelect]);
-
-  React.useEffect(() => {
     if (inspectorEnabled) {
       inspector.mount();
+      inspector.emitter.on('select', onSelect);
     } else {
       inspector.unmount();
+      inspector.emitter.off('select', onSelect);
     }
 
     return () => {
       inspector.unmount();
+      inspector.emitter.off('select', onSelect);
     };
-  }, [inspector, inspectorEnabled]);
+  }, [inspector, inspectorEnabled, onSelect]);
 
   return (
-    <div className="main-panel p-2">
+    <Dimmable className="main-panel p-2" dimmed={saving}>
+      {saving ? <Dimmer>Saving...</Dimmer> : null}
+
       <div className="flex items-center">
         <Toggle
           checked={inspectorEnabled}
@@ -49,8 +48,20 @@ export default function MainPanel(): JSX.Element {
           <BucketSelector />
           <Button
             className="ml-2"
-            disabled={selectedEls.length === 0}
-            onClick={() => store.saveScrap(selectedEls)}
+            disabled={selectedEls.length === 0 || saving}
+            onClick={async () => {
+              setSaving(true);
+
+              try {
+                const res = await store.saveScrap(selectedEls);
+
+                if (res.success) {
+                  setSelectedEls([]);
+                }
+              } finally {
+                setSaving(false);
+              }
+            }}
           >
             Save!
           </Button>
@@ -58,6 +69,6 @@ export default function MainPanel(): JSX.Element {
       </div>
 
       {selectedEls.length ? <PreviewHTMLElements els={selectedEls} /> : null}
-    </div>
+    </Dimmable>
   );
 }

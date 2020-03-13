@@ -22,7 +22,7 @@ module.exports = webpackConfig => {
     },
     plugins: [
       new webpack.EnvironmentPlugin({
-        NODE_ENV: 'development'
+        COSMOS: '1'
       })
     ]
   });

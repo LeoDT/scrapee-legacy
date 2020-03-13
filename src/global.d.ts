@@ -8,5 +8,5 @@ interface Window {
   bucketStore: any;
 }
 
-declare module '*.string.css';
+declare module '*.css?string';
 declare module 'react-shadow';

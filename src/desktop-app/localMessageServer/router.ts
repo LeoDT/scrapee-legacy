@@ -3,7 +3,7 @@ import { Request, ResponseBody, fail, success } from 'shared/utils/localMessage'
 
 import { Routes, RouterContext } from './types';
 
-export async function startRouter(stream: Socket, routes: Routes, request: Request): Promise<void> {
+export async function startRouter(socket: Socket, routes: Routes, request: Request): Promise<void> {
   const handler = routes[request.resource];
 
   if (handler) {
@@ -11,14 +11,14 @@ export async function startRouter(stream: Socket, routes: Routes, request: Reque
       request,
       send: (body: ResponseBody = success()) => {
         const res = JSON.stringify({ type: 'response', requestId: request.requestId, body });
-        stream.write(res);
+        socket.write(res);
 
         console.log(`on send: ${res}`);
       }
     };
 
-    await handler(context);
+    return await handler(context);
   }
 
-  stream.write(JSON.stringify({ type: 'response', requestId: request.requestId, body: fail() }));
+  socket.write(JSON.stringify({ type: 'response', requestId: request.requestId, body: fail() }));
 }

@@ -1,4 +1,4 @@
-import './hot-reload';
+import './hotReload';
 import { nativeRequest } from './nativeRequest';
 
 chrome.runtime.onInstalled.addListener(() => {

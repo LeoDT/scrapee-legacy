@@ -2,6 +2,7 @@ import { observable, IObservableArray } from 'mobx';
 
 import { Bucket } from 'shared/models/Bucket';
 import { DOMClipperApi } from './api';
+import { Scrap } from '../models/Scrap';
 
 export class Store {
   api: DOMClipperApi;
@@ -37,10 +38,16 @@ export class Store {
   }
 
   async saveScrap(els: HTMLElement[]): Promise<PlainObject> {
-    const text = els.map(e => e.textContent).join('\n');
+    const scrap = new Scrap(document.title);
+    scrap.source = 'web-clipper';
+    scrap.sourceUrl = location.href;
+
+    els.forEach(el => {
+      scrap.addTextContent(el.textContent || '', el.outerHTML);
+    });
 
     if (this.selectedBucket) {
-      return this.api.saveScrap({ bucketId: this.selectedBucket.path, text });
+      return this.api.saveScrap({ bucketId: this.selectedBucket.path, scrap });
     }
 
     return {};

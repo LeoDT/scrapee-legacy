@@ -1,10 +1,12 @@
 import path from 'path';
-import webpack from 'webpack';
 import merge from 'webpack-merge';
+import { dependencies as externals } from '../package.json';
 
 import baseConfig from './webpack.config.base';
 
 export default merge.smart(baseConfig, {
+  externals: [...Object.keys(externals || {})],
+
   devtool: 'none',
 
   mode: process.env.NODE_ENV,
@@ -17,12 +19,6 @@ export default merge.smart(baseConfig, {
     path: path.resolve(__dirname, '..', 'dist', 'desktop-app'),
     filename: 'main.js'
   },
-
-  plugins: [
-    new webpack.EnvironmentPlugin({
-      NODE_ENV: process.env.NODE_ENV
-    })
-  ],
 
   node: {
     __dirname: false,

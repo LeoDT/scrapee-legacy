@@ -4,26 +4,38 @@ import * as net from 'net';
 import { startRouter } from './router';
 import { routes } from './routes';
 
-const server = net.createServer(stream => {
-  stream.on('data', async buffer => {
-    const s = buffer.toString();
+const server = net.createServer({ allowHalfOpen: true }, socket => {
+  const buffers: Buffer[] = [];
+
+  socket.on('data', async data => {
+    buffers.push(data);
+  });
+
+  socket.on('end', async () => {
+    console.log('on end');
+
+    const s = buffers.map(b => b.toString()).join('');
     console.log(`on data: ${s}`);
 
     try {
       const request = JSON.parse(s);
 
       if (request.type === 'request') {
-        await startRouter(stream, routes, request);
+        await startRouter(socket, routes, request);
       }
     } catch (e) {
       console.log(e);
     }
 
-    stream.end();
+    socket.end();
   });
 
-  stream.on('end', () => {
-    console.log(`on end`);
+  socket.on('error', error => {
+    console.error('error', error);
+  });
+
+  socket.on('close', () => {
+    console.log('close');
   });
 });
 

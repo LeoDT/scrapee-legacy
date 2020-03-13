@@ -7,6 +7,8 @@ import { DOMInspector } from 'shared/dom-inspector';
 import { DOMInspectorContext } from './context';
 import MainPanel from './MainPanel';
 
+const styles = process.env.COSMOS === '1' ? '' : require('../style.css?string');
+
 interface Props {
   ignoreRoot?: HTMLElement;
 }
@@ -40,12 +42,11 @@ export default function Clipper({ ignoreRoot }: Props): JSX.Element {
     };
   }, [bodyHeightPlaceHolder]);
 
-  const Wrapper = process.env.NODE_ENV === 'production' ? ShadowRoot.div : 'div';
-  const styles = process.env.NODE_ENV === 'production' ? require('./styles.string.css') : '';
+  const Wrapper = process.env.COSMOS === '1' ? 'div' : ShadowRoot.div;
 
   return (
     <DOMInspectorContext.Provider value={inspector}>
-      <Wrapper ref={rootRef}>
+      <Wrapper ref={rootRef} data-scrapee-ignore>
         <style type="text/css">{styles}</style>
         <div
           ref={panelRef}

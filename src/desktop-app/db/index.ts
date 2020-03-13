@@ -11,7 +11,7 @@ export async function readScrap(path: string): Promise<Scrap> {
   const file = await fs.readFile(path);
   const json = JSON.parse(file.toString());
 
-  const scrap = new Scrap(json.name, json.type);
+  const scrap = Scrap.fromJSON(json);
 
   return scrap;
 }

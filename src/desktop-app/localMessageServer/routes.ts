@@ -15,15 +15,10 @@ export const routes: Routes = {
     send(success({ buckets: getChildBuckets(root) }));
   },
   saveScrap: async ({ request, send }) => {
-    const { bucketId, text } = request.body as { bucketId: string; text: string };
+    const { bucketId, scrap } = request.body as { bucketId: string; scrap: PlainObject };
 
-    if (bucketId && text) {
-      const scrap = new Scrap();
-      scrap.source = 'web-clipper';
-
-      scrap.addTextContent(text);
-
-      await saveScrap(bucketId, scrap);
+    if (bucketId && scrap) {
+      await saveScrap(bucketId, Scrap.fromJSON(scrap));
     }
 
     send();

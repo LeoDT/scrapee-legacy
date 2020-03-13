@@ -14,3 +14,53 @@
     @apply pr-8;
   }
 }
+
+.preview-html {
+  @apply font-normal;
+
+  h1 {
+    @apply text-3xl font-semibold mb-4;
+  }
+  h2 {
+    @apply text-xl font-semibold mb-4;
+  }
+  h3 {
+    @apply text-lg font-semibold mb-4;
+  }
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold mb-2;
+  }
+
+  p {
+    @apply mb-4;
+  }
+
+  a {
+    @apply text-blue-500 underline cursor-pointer;
+  }
+
+  img {
+  }
+
+  blockquote {
+    @apply border-l-8 mb-4 px-4 py-2 border-gray-300 italic;
+  }
+
+  code {
+    @apply bg-gray-200 font-mono px-1;
+  }
+
+  pre {
+    @apply whitespace-pre overflow-x-auto bg-gray-200 px-4 py-2;
+
+    code {
+      @apply whitespace-pre bg-transparent p-0;
+    }
+  }
+
+  hr {
+    @apply my-10;
+  }
+}

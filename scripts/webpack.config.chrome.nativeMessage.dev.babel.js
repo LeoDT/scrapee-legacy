@@ -2,25 +2,28 @@ import path from 'path';
 import webpack from 'webpack';
 import merge from 'webpack-merge';
 import CopyPlugin from 'copy-webpack-plugin';
+import WebpackShellPlugin from 'webpack-shell-plugin';
+
+import { dependencies as externals } from '../package.json';
 
 import baseConfig from './webpack.config.base';
 
-export default merge.smart(Object.assign({}, baseConfig, { externals: ['styled-components'] }), {
-  devtool: 'inline-source-map',
+export default merge.smart(baseConfig, {
+  externals: [...Object.keys(externals || {})],
 
-  mode: 'development',
+  devtool: 'none',
 
-  target: 'web',
+  mode: process.env.NODE_ENV,
+
+  target: 'node',
 
   entry: {
-    background: path.resolve(__dirname, '..', 'src', 'extension-chrome', 'background.ts'),
-    content: path.resolve(__dirname, '..', 'src', 'extension-chrome', 'content.ts')
+    nativeMessage: path.resolve(__dirname, '..', 'src', 'extension-chrome', 'nativeMessage.ts')
   },
 
   output: {
     path: path.resolve(__dirname, '..', 'dist', 'extension-chrome'),
-    filename: '[name].js',
-    libraryTarget: 'var'
+    filename: '[name].js'
   },
 
   plugins: [
@@ -45,13 +48,17 @@ export default merge.smart(Object.assign({}, baseConfig, { externals: ['styled-c
         ),
         to: path.resolve(__dirname, '..', 'dist', 'extension-chrome')
       }
-    ])
-  ],
+    ]),
 
-  node: {
-    __dirname: false,
-    __filename: false
-  },
+    new webpack.BannerPlugin({
+      banner: '#!/Users/LeoDT/.nvm/versions/node/v12.13.1/bin/node',
+      raw: true
+    }),
+
+    new WebpackShellPlugin({
+      onBuildEnd: ['chmod +x dist/extension-chrome/nativeMessage.js']
+    })
+  ],
 
   watch: true,
   watchOptions: {

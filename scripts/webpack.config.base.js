@@ -1,10 +1,7 @@
 import path from 'path';
 import webpack from 'webpack';
-import { dependencies as externals } from '../package.json';
 
 export default {
-  externals: [...Object.keys(externals || {})],
-
   module: {
     rules: [
       {
@@ -18,12 +15,16 @@ export default {
         }
       },
       {
-        test: /\.string\.css$/,
-        use: ['to-string-loader', 'css-loader', 'postcss-loader']
-      },
-      {
         test: /\.css$/,
-        use: ['style-loader', 'postcss-loader']
+        oneOf: [
+          {
+            resourceQuery: /string/,
+            use: ['to-string-loader', 'css-loader', 'postcss-loader']
+          },
+          {
+            use: ['style-loader', 'css-loader', 'postcss-loader']
+          }
+        ]
       },
       {
         test: /\.svg$/,
