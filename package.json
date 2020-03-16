@@ -81,14 +81,12 @@
     "webpack-shell-plugin": "^0.5.0"
   },
   "scripts": {
-    "dev": "concurrently 'yarn run dev-renderer' 'yarn run dev-main' 'yarn run dev-chrome'",
-    "build-main": "cross-env NODE_ENV=development webpack --config scripts/webpack.config.main.babel.js",
+    "dev": "concurrently --names 'renderer,main,chrome' 'yarn run dev-renderer' 'yarn run dev-main' 'yarn run dev-chrome'",
     "dev-renderer": "cross-env NODE_ENV=development webpack-dev-server --config scripts/webpack.config.renderer.dev.babel.js",
     "dev-main": "cross-env ELECTRON_DISABLE_SECURITY_WARNINGS=1 NODE_ENV=development electron -r ./scripts/BabelRegister ./src/desktop-app/main.ts",
     "dev-chrome": "cross-env NODE_ENV=development webpack --watch --config scripts/webpack.config.chrome.dev.babel.js",
     "dev-chrome-nativeMessage": "cross-env NODE_ENV=development webpack --watch --config scripts/webpack.config.chrome.nativeMessage.dev.babel.js",
-    "cosmos": "cosmos",
-    "start": "cross-env ELECTRON_DISABLE_SECURITY_WARNINGS=1 NODE_ENV=development electron dist/desktop-app/main.js"
+    "cosmos": "cosmos"
   },
   "browserslist": [
     "last 1 Chrome versions"

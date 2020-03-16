@@ -51,7 +51,7 @@ export default merge.smart(baseConfig, {
     compress: true,
     stats: 'errors-only',
     inline: true,
-    noInfo: true,
+    noInfo: false,
     lazy: false,
     hot: true,
     headers: { 'Access-Control-Allow-Origin': '*' },

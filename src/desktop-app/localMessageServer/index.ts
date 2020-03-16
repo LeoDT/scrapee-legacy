@@ -45,6 +45,6 @@ if (fs.existsSync(socketPath)) {
   fs.unlinkSync(socketPath);
 }
 
-server.listen('/tmp/scrapee.sock');
+server.listen(socketPath);
 
 export { server };

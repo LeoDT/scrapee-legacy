@@ -1,4 +1,3 @@
-import { range } from 'lodash';
 import { DOMClipperApi } from 'shared/dom-clipper/api';
 import { Resource } from 'shared/utils/localMessage';
 
@@ -24,12 +23,7 @@ function request(resource: Resource, body?: PlainObject): Promise<PlainObject> {
 }
 
 export const api = {
-  init: () =>
-    request('init', {
-      a: range(4889)
-        .map(() => '1')
-        .join('')
-    }),
+  init: () => request('init'),
   loadBuckets: () => request('buckets'),
   saveScrap: body => request('saveScrap', body)
 } as DOMClipperApi;
