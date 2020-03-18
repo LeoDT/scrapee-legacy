@@ -21,6 +21,10 @@ export class Bucket {
     this.children = observable.array([], { deep: false });
   }
 
+  get id(): string {
+    return this.path;
+  }
+
   get childrenBuckets(): Bucket[] {
     return getChildBuckets(this);
   }
@@ -31,6 +35,20 @@ decorate(Bucket, {
   childrenBuckets: computed
 });
 
-export function getChildBuckets(bucket: Bucket): Bucket[] {
-  return bucket.children.filter((c): c is Bucket => c instanceof Bucket);
+export function getChildBuckets(b: Bucket): Bucket[] {
+  return b.children.filter((c): c is Bucket => c instanceof Bucket);
+}
+
+export function walkBucket(root: Bucket, walker: (b: Bucket | Scrap) => void): void {
+  function walk(cursor: Bucket | Scrap): void {
+    walker(cursor);
+
+    if (cursor instanceof Bucket) {
+      cursor.children.forEach(child => {
+        walk(child);
+      });
+    }
+  }
+
+  walk(root);
 }

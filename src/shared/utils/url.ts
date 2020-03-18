@@ -1,6 +1,7 @@
-export function absoluteURL(url: string): string {
-  const a = document.createElement('a');
-  a.href = url;
+const absoluteURLAnchor = document.createElement('a');
 
-  return a.href;
+export function absoluteURL(url: string): string {
+  absoluteURLAnchor.href = url;
+
+  return absoluteURLAnchor.href;
 }

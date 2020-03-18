@@ -2,10 +2,8 @@ import createDOMPurify from 'dompurify';
 
 import { absoluteURL } from './url';
 
-const purify = createDOMPurify(window);
-
-/* #region configs */
-purify.setConfig({
+const defaultConfig = {
+  /* #region configs */
   ALLOWED_TAGS: [
     'a',
     'abbr',
@@ -103,27 +101,44 @@ purify.setConfig({
     'value',
     'rowspan',
     'colspan',
-    'datetime'
+    'datetime',
+    'width',
+    'height'
   ]
-});
-/* #endregion */
+  /* #endregion */
+};
 
-purify.addHook('uponSanitizeElement', node => {
-  if (node instanceof Element) {
-    if (node.hasAttribute('data-scrapee-ignore')) {
-      return node.parentNode?.removeChild(node);
+interface SanitizeHTMLOptions {
+  absolutifyURLs?: boolean;
+}
+
+export function sanitizeHTML(html: string, options?: SanitizeHTMLOptions): string {
+  const { absolutifyURLs = true } = options ?? {};
+
+  const purify = createDOMPurify(window);
+  purify.setConfig(defaultConfig);
+
+  purify.addHook('uponSanitizeElement', node => {
+    if (node instanceof Element) {
+      if (node.hasAttribute('data-scrapee-ignore')) {
+        return node.parentNode?.removeChild(node);
+      }
+
+      if (absolutifyURLs) {
+        const src = node.getAttribute('src');
+        if (src) {
+          node.setAttribute('src', absoluteURL(src));
+        }
+
+        const href = node.getAttribute('href');
+        if (href && !href.startsWith('#')) {
+          node.setAttribute('href', absoluteURL(href));
+        }
+      }
     }
 
-    if (node.hasAttribute('src')) {
-      const src = node.getAttribute('src');
+    return node;
+  });
 
-      if (src) node.setAttribute('src', absoluteURL(src));
-    }
-  }
-
-  return node;
-});
-
-export function sanitizeHTML(html: string): string {
   return purify.sanitize(html).trim();
 }

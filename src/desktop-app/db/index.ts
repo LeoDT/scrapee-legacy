@@ -7,11 +7,12 @@ import { Scrap } from '../../shared/models/Scrap';
 const root = '/Users/LeoDT/tmp/scrapee';
 const bucketsRoot = resolve(root, 'buckets');
 
-export async function readScrap(path: string): Promise<Scrap> {
+export async function readScrap(path: string): Promise<Scrap[]> {
   const file = await fs.readFile(path);
   const json = JSON.parse(file.toString());
 
-  const scrap = Scrap.fromJSON(json);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const scrap = json.map((item: any) => Scrap.fromJSON(item));
 
   return scrap;
 }
@@ -22,7 +23,7 @@ export async function readBucket(path: string): Promise<Array<Bucket | Scrap>> {
   try {
     const dirents = await fs.readdir(fullPath, { withFileTypes: true });
 
-    return Promise.all<Bucket | Scrap>(
+    const children = await Promise.all<Bucket | Scrap[]>(
       dirents
         .map(de => {
           const direntPath = resolve(fullPath, de.name);
@@ -43,8 +44,10 @@ export async function readBucket(path: string): Promise<Array<Bucket | Scrap>> {
 
           return null;
         })
-        .filter((e): e is Promise<Bucket> | Promise<Scrap> => e !== null)
+        .filter((e): e is Promise<Bucket> | Promise<Scrap[]> => e !== null)
     );
+
+    return children.flat();
   } catch (e) {
     console.log(e);
 

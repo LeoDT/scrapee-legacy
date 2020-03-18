@@ -8,7 +8,7 @@ import List from './List';
 import Detail from './Detail';
 
 export default function index(): JSX.Element | null {
-  const [store, setStore] = React.useState();
+  const [store, setStore] = React.useState<BucketsStore | null>();
 
   React.useEffect(() => {
     readRootBucket().then(bucket => {
@@ -23,14 +23,14 @@ export default function index(): JSX.Element | null {
 
   return store ? (
     <BucketsStoreContext.Provider value={store}>
-      <div className="library-main flex items-stretch">
+      <div className="library-main flex flex-grow overflow-hidden">
         <List />
 
         <Switch>
           <Route exact path="/library">
             <div className="flex-grow" />
           </Route>
-          <Route exact path="/library/:bucket">
+          <Route exact path="/library/:bucketId">
             <Detail />
           </Route>
         </Switch>

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { cx } from 'emotion';
 
-import ChevronDownIcon from '../../assets/chevron-down.svg';
+import ChevronDownIcon from '../../assets/icon/chevron-down.svg';
 
 interface Option {
   text: string;

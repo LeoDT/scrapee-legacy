@@ -1,4 +1,4 @@
-import { app, BrowserWindow, screen } from 'electron';
+import { app, BrowserWindow, screen, shell } from 'electron';
 import * as path from 'path';
 
 import { server as localMessageServer } from './localMessageServer';
@@ -46,9 +46,7 @@ app.on('ready', async () => {
       : `file://${path.join(__dirname, 'index.html')}`
   );
 
-  // @TODO: Use 'ready-to-show' event
-  //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
-  mainWindow.webContents.on('did-finish-load', () => {
+  mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
       throw new Error('"mainWindow" is not defined');
     }
@@ -59,6 +57,16 @@ app.on('ready', async () => {
       mainWindow.focus();
     }
   });
+
+  function openLink(e: Electron.Event, url: string): void {
+    if (mainWindow && url !== mainWindow.webContents.getURL()) {
+      e.preventDefault();
+      shell.openExternal(url);
+    }
+  }
+
+  mainWindow.webContents.on('will-navigate', openLink);
+  mainWindow.webContents.on('new-window', openLink);
 
   mainWindow.on('closed', () => {
     mainWindow = null;

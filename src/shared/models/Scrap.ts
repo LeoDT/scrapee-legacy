@@ -1,4 +1,5 @@
-import uuid from '../../shared/utils/uuid';
+import { DateTime } from 'luxon';
+import uuid from 'shared/utils/uuid';
 
 export type ScrapType = 'text' | 'file';
 export type ScrapSource = 'web-clipper';
@@ -14,8 +15,11 @@ export interface ScrapContent {
 export class Scrap {
   static fromJSON(json: PlainObject): Scrap {
     const scrap = new Scrap(json.name as string);
+
+    scrap.id = json.id as string;
     scrap.source = json.source as ScrapSource;
     scrap.sourceUrl = json.sourceUrl as string;
+    scrap.createdAt = DateTime.fromISO(json.createdAt as string);
 
     scrap.content = json.content as ScrapContent[];
 
@@ -30,10 +34,13 @@ export class Scrap {
 
   content: ScrapContent[];
 
+  createdAt: DateTime;
+
   constructor(name = '') {
     this.name = name;
 
     this.id = uuid.new();
+    this.createdAt = DateTime.local();
 
     this.content = [];
   }
@@ -43,7 +50,7 @@ export class Scrap {
       .map(({ key }) => key)
       .filter((k): k is number => typeof k === 'number');
 
-    return Math.max(0, ...numberKeys);
+    return Math.max(0, ...numberKeys) + 1;
   }
 
   addTextContent(value: string, originalHTML?: string, key?: string): ScrapContent {

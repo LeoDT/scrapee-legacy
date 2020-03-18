@@ -8,22 +8,23 @@
   "private": true,
   "dependencies": {
     "@hot-loader/react-dom": "^16.12.0",
-    "@types/sanitize-html": "^1.20.2",
     "dompurify": "^2.0.8",
     "emotion": "^10.0.27",
     "fs-extra": "^8.1.0",
+    "i18next": "^19.3.3",
     "lodash": "^4.17.15",
+    "luxon": "^1.22.0",
     "mitt": "^1.2.0",
     "mobx": "^5.15.4",
     "mobx-react-lite": "^1.5.1",
     "react": "^16.13.0",
     "react-dom": "npm:@hot-loader/react-dom",
+    "react-i18next": "^11.3.3",
     "react-router-dom": "^5.1.2",
     "react-shadow": "^17.5.0",
     "short-uuid": "^3.1.1",
     "tailwindcss": "^1.2.0",
-    "winston": "^3.2.1",
-    "xss": "^1.0.6"
+    "winston": "^3.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.8.7",
@@ -37,6 +38,7 @@
     "@types/chrome": "^0.0.98",
     "@types/dompurify": "^2.0.1",
     "@types/lodash": "^4.14.149",
+    "@types/luxon": "^1.21.0",
     "@types/react": "^16.9.23",
     "@types/react-dom": "^16.9.4",
     "@types/react-router-dom": "^5.1.3",
@@ -86,7 +88,8 @@
     "dev-main": "cross-env ELECTRON_DISABLE_SECURITY_WARNINGS=1 NODE_ENV=development electron -r ./scripts/BabelRegister ./src/desktop-app/main.ts",
     "dev-chrome": "cross-env NODE_ENV=development webpack --watch --config scripts/webpack.config.chrome.dev.babel.js",
     "dev-chrome-nativeMessage": "cross-env NODE_ENV=development webpack --watch --config scripts/webpack.config.chrome.nativeMessage.dev.babel.js",
-    "cosmos": "cosmos"
+    "cosmos": "cosmos",
+    "update-i18n": "./scripts/downloadTranslations.js"
   },
   "browserslist": [
     "last 1 Chrome versions"

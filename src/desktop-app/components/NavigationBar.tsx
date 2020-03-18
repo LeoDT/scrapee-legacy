@@ -2,7 +2,7 @@ import * as React from 'react';
 import { css, cx } from 'emotion';
 import { NavLink } from 'react-router-dom';
 
-import LibraryIcon from '../../assets/library.svg';
+import LibraryIcon from '../../assets/icon/library.svg';
 
 interface NavigationBarItemProps {
   children: React.ReactNode;
