@@ -38,7 +38,7 @@ export default function BucketListItem({ bucket, level = 1 }: Props): JSX.Elemen
                   [
                     {
                       id: 'createBucket',
-                      label: 'Create Bucket',
+                      label: t('createBucket'),
                       click: async () => {
                         await bucketStore.createBucket(bucket, t('defaultNewBucketName'));
 
@@ -49,7 +49,7 @@ export default function BucketListItem({ bucket, level = 1 }: Props): JSX.Elemen
                     },
                     {
                       id: 'deleteBucket',
-                      label: 'Delete Bucket',
+                      label: t('deleteBucket'),
                       click: async () => {
                         if (await ui.modal.confirm('Are you sure?')) {
                           await bucketStore.moveBucketToTrash(bucket);

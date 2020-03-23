@@ -1,6 +1,8 @@
 {
-    "bucket": "bucket",
-    "bucket_plural": "buckets",
-    "inspector:inspector_on": "Inspector On",
-    "defaultNewBucketName": "New Bucket"
+  "bucket": "bucket",
+  "bucket_plural": "buckets",
+  "inspector:inspector_on": "Inspector On",
+  "defaultNewBucketName": "New Bucket",
+  "createBucket": "Create Bucket",
+  "deleteBucket": "Delete Bucket"
 }

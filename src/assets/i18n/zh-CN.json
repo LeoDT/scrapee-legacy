@@ -1,1 +1,9 @@
-{}
+{
+    "Delete Bucket": "删除桶",
+    "createBucket": "创建桶",
+    "defaultNewBucketName": "新桶",
+    "inspector:inspector_on": "拾取中",
+    "bucket_plural": "桶",
+    "bucket": "桶",
+    "deleteBucket": "删除桶"
+}
