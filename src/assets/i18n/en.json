@@ -1,5 +1,6 @@
 {
     "bucket": "bucket",
     "bucket_plural": "buckets",
-    "inspector:inspector_on": "Inspector On"
+    "inspector:inspector_on": "Inspector On",
+    "defaultNewBucketName": "New Bucket"
 }

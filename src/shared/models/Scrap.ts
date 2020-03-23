@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon';
 import uuid from 'shared/utils/uuid';
+import { Bucket } from './Bucket';
 
 export type ScrapType = 'text' | 'file';
 export type ScrapSource = 'web-clipper';
@@ -10,6 +11,14 @@ export interface ScrapContent {
   value: string;
 
   originalHTML?: string;
+  xPath?: string;
+}
+
+export interface ScrapContentMeta {
+  key?: string | number;
+  type?: ScrapType;
+  originalHTML?: string;
+  xPath?: string;
 }
 
 export class Scrap {
@@ -28,6 +37,7 @@ export class Scrap {
 
   id: string;
   name?: string;
+  parent?: Bucket;
 
   source?: ScrapSource;
   sourceUrl?: string;
@@ -36,8 +46,9 @@ export class Scrap {
 
   createdAt: DateTime;
 
-  constructor(name = '') {
+  constructor(name = '', parent?: Bucket) {
     this.name = name;
+    this.parent = parent;
 
     this.id = uuid.new();
     this.createdAt = DateTime.local();
@@ -53,12 +64,16 @@ export class Scrap {
     return Math.max(0, ...numberKeys) + 1;
   }
 
-  addTextContent(value: string, originalHTML?: string, key?: string): ScrapContent {
+  addTextContent(
+    value: string,
+    { originalHTML, key, xPath, type = 'text' }: ScrapContentMeta
+  ): ScrapContent {
     const content: ScrapContent = {
-      type: 'text',
+      type,
       value,
       key: key ?? this.generateKeyForNewContent(),
-      originalHTML
+      originalHTML,
+      xPath
     };
 
     this.content.push(content);

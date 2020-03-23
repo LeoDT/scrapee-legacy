@@ -2,8 +2,9 @@ import { observable, IObservableArray } from 'mobx';
 
 import { Bucket } from 'shared/models/Bucket';
 import { Scrap } from 'shared/models/Scrap';
-import { sanitizeHTML } from 'shared/utils/html';
+import { sanitizeHTMLElement } from 'shared/utils/html';
 import { DOMClipperApi } from './api';
+import { xPath } from '../utils/domPath';
 
 export class Store {
   api: DOMClipperApi;
@@ -44,7 +45,10 @@ export class Store {
     scrap.sourceUrl = location.href;
 
     els.forEach(el => {
-      scrap.addTextContent(sanitizeHTML(el.outerHTML), el.outerHTML);
+      scrap.addTextContent(sanitizeHTMLElement(el, { absolutifyURLs: true }), {
+        originalHTML: el.outerHTML,
+        xPath: xPath(el)
+      });
     });
 
     if (this.selectedBucket) {

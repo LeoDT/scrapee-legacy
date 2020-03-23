@@ -1,11 +1,17 @@
 import { resolve } from 'path';
-import { promises as fs } from 'fs';
+import { promises as fs, ensureDir } from 'fs-extra';
 
-import { Bucket } from '../../shared/models/Bucket';
+import { Bucket, TRASH_BUCKET_NAME } from '../../shared/models/Bucket';
 import { Scrap } from '../../shared/models/Scrap';
 
 const root = '/Users/LeoDT/tmp/scrapee';
 const bucketsRoot = resolve(root, 'buckets');
+const trashPath = resolve(bucketsRoot, TRASH_BUCKET_NAME);
+
+export async function startup(): Promise<void> {
+  await ensureDir(bucketsRoot);
+  await ensureDir(trashPath);
+}
 
 export async function readScrap(path: string): Promise<Scrap[]> {
   const file = await fs.readFile(path);
@@ -17,7 +23,7 @@ export async function readScrap(path: string): Promise<Scrap[]> {
   return scrap;
 }
 
-export async function readBucket(path: string): Promise<Array<Bucket | Scrap>> {
+export async function readBucket(path: string, parent?: Bucket): Promise<Array<Bucket | Scrap>> {
   const fullPath = resolve(bucketsRoot, path);
 
   try {
@@ -29,9 +35,9 @@ export async function readBucket(path: string): Promise<Array<Bucket | Scrap>> {
           const direntPath = resolve(fullPath, de.name);
 
           if (de.isDirectory()) {
-            const b = new Bucket(direntPath, de.name);
+            const b = new Bucket(direntPath, parent);
 
-            readBucket(b.path).then(children => {
+            readBucket(b.path, b).then(children => {
               b.children.replace(children);
             });
 
@@ -56,9 +62,9 @@ export async function readBucket(path: string): Promise<Array<Bucket | Scrap>> {
 }
 
 export async function readRootBucket(): Promise<Bucket> {
-  const rootBucket = new Bucket(bucketsRoot, 'ROOT');
+  const rootBucket = new Bucket(bucketsRoot);
 
-  rootBucket.children.replace(await readBucket(bucketsRoot));
+  rootBucket.children.replace(await readBucket(bucketsRoot, rootBucket));
 
   return rootBucket;
 }
@@ -80,4 +86,33 @@ export async function saveScrap(bucketPath: string, scrap: Scrap): Promise<void>
   await fs.writeFile(scrapPath, JSON.stringify(json));
 
   console.log('scrap saved');
+}
+
+export async function createBucket(parent: Bucket, name: string): Promise<Bucket> {
+  const bucket = new Bucket(resolve(parent.path, name));
+
+  try {
+    await fs.mkdir(bucket.path);
+  } catch (e) {
+    console.log('create bucket failed', e);
+  }
+
+  parent.children.push(bucket);
+
+  return bucket;
+}
+
+export async function moveBucket(src: Bucket, dst: Bucket): Promise<void> {
+  if (src.isRoot || src.isTrash) {
+    throw Error('root or trash is not movabled');
+  }
+
+  try {
+    await fs.rename(src.path, `${dst.path}/${src.name}`);
+  } catch (e) {
+    console.log('move bucket failed', e);
+  }
+
+  src.parent?.children.remove(src);
+  dst.children.push(src);
 }

@@ -5,6 +5,8 @@ import { createContextNoNullCheck } from 'shared/utils/react';
 import { Bucket, walkBucket } from 'shared/models/Bucket';
 import { Scrap } from 'shared/models/Scrap';
 
+import { createBucket, moveBucket } from '../db';
+
 export class BucketsStore {
   rootBucket: Bucket;
   expandStatus: {
@@ -39,8 +41,20 @@ export class BucketsStore {
     return index;
   }
 
+  get trashBucket(): Bucket {
+    return this.rootBucket.childrenBuckets.find(b => b.isTrash) as Bucket;
+  }
+
   findBucketWithPath(p: string): Bucket | undefined {
     return this.bucketIndex.get(p);
+  }
+
+  async createBucket(parent: Bucket, name: string): Promise<Bucket> {
+    return createBucket(parent, name);
+  }
+
+  async moveBucketToTrash(b: Bucket): Promise<void> {
+    return moveBucket(b, this.trashBucket);
   }
 }
 

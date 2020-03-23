@@ -3,11 +3,15 @@ import * as React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Observer } from 'mobx-react-lite';
 import { cx, css } from 'emotion';
+import { useTranslation } from 'react-i18next';
 
-import { Bucket } from '../../../shared/models/Bucket';
+import { Bucket } from 'shared/models/Bucket';
+
 import { useBucketsStore } from '../../stores/buckets';
+import { showContextMenu } from '../../utils/contextMenu';
 
 import AngleRightIcon from '../../../assets/icon/angle-right.svg';
+import { useCommonStores } from '../../../shared/stores';
 
 interface Props {
   bucket: Bucket;
@@ -15,8 +19,10 @@ interface Props {
 }
 
 export default function BucketListItem({ bucket, level = 1 }: Props): JSX.Element {
+  const { ui } = useCommonStores();
   const bucketStore = useBucketsStore();
   const history = useHistory();
+  const { t } = useTranslation();
 
   return (
     <Observer>
@@ -25,13 +31,45 @@ export default function BucketListItem({ bucket, level = 1 }: Props): JSX.Elemen
 
         return (
           <>
-            <div className="bucket-list-item">
+            <div
+              className="bucket-list-item"
+              onContextMenu={e =>
+                showContextMenu(
+                  [
+                    {
+                      id: 'createBucket',
+                      label: 'Create Bucket',
+                      click: async () => {
+                        await bucketStore.createBucket(bucket, t('defaultNewBucketName'));
+
+                        if (!expanded) {
+                          bucketStore.toggleExpand(bucket);
+                        }
+                      }
+                    },
+                    {
+                      id: 'deleteBucket',
+                      label: 'Delete Bucket',
+                      click: async () => {
+                        if (await ui.modal.confirm('Are you sure?')) {
+                          await bucketStore.moveBucketToTrash(bucket);
+
+                          if (expanded) {
+                            bucketStore.toggleExpand(bucket);
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  { x: e.pageX, y: e.pageY }
+                )
+              }
+            >
               <div
                 className={cx(
                   'bucket-name py-1 flex items-stretch text-gray-700 cursor-pointer truncate',
                   bucketStore.selectedBucket === bucket ? 'bg-white' : 'hover:bg-gray-100'
                 )}
-                style={{}}
                 onClick={() => {
                   history.push(`/library/${encodeURIComponent(bucket.path)}`);
                 }}

@@ -1,10 +1,23 @@
 import { hot } from 'react-hot-loader/root';
 import * as React from 'react';
 
+import { createCommonStores, CommonStoresContext } from 'shared/stores';
+
+import ModalManager from 'shared/components/Modal/Manager';
 import MainWindow from './components/MainWindow';
 
 function App(): JSX.Element {
-  return <MainWindow />;
+  const [commonStores] = React.useState(() => createCommonStores());
+
+  return (
+    <CommonStoresContext.Provider value={commonStores}>
+      <>
+        <MainWindow />
+
+        <ModalManager />
+      </>
+    </CommonStoresContext.Provider>
+  );
 }
 
 export default hot(App);

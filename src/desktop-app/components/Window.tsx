@@ -11,7 +11,7 @@ export default function Window({
 }: React.HTMLProps<HTMLDivElement>): JSX.Element {
   return (
     <div className={cx('flex flex-col h-screen overflow-hidden select-none', className)}>
-      <div className={cx(titleBarClassName, 'webkit-app-region-drag', 'bg-gray-800')} />
+      <div className={cx(titleBarClassName, 'webkit-app-region-drag z-50 bg-gray-800')} />
       <div className="flex flex-grow overflow-hidden">{children}</div>
     </div>
   );

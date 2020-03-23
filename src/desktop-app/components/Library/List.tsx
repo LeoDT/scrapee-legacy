@@ -24,9 +24,11 @@ export default function List(): JSX.Element {
       <Observer>
         {() => (
           <>
-            {store.rootBucket.childrenBuckets.map(bucket => (
-              <BucketListItem key={bucket.path} bucket={bucket} />
-            ))}
+            {store.rootBucket.childrenBuckets
+              .filter(b => !b.isTrash)
+              .map(bucket => (
+                <BucketListItem key={bucket.path} bucket={bucket} />
+              ))}
           </>
         )}
       </Observer>

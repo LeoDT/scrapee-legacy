@@ -3,26 +3,35 @@ import { observable, computed, decorate, IObservableArray } from 'mobx';
 
 import { Scrap } from './Scrap';
 
+export const TRASH_BUCKET_NAME = '__TRASH__';
+
 export class Bucket {
   path: string;
-  name: string;
 
+  parent?: Bucket;
   children: IObservableArray<Bucket | Scrap>;
 
-  constructor(path: string, name?: string) {
+  constructor(path: string, parent?: Bucket) {
     this.path = path;
 
-    if (name) {
-      this.name = name;
-    } else {
-      this.name = basename(path);
-    }
-
+    this.parent = parent;
     this.children = observable.array([], { deep: false });
+  }
+
+  get name(): string {
+    return basename(this.path);
   }
 
   get id(): string {
     return this.path;
+  }
+
+  get isRoot(): boolean {
+    return !this.parent;
+  }
+
+  get isTrash(): boolean {
+    return this.name === TRASH_BUCKET_NAME;
   }
 
   get childrenBuckets(): Bucket[] {
@@ -31,7 +40,11 @@ export class Bucket {
 }
 
 decorate(Bucket, {
-  name: observable.ref,
+  path: observable.ref,
+  parent: observable.ref,
+
+  isRoot: computed,
+  isTrash: computed,
   childrenBuckets: computed
 });
 
