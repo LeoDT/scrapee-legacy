@@ -1,13 +1,14 @@
-import { app, BrowserWindow, screen, shell } from 'electron';
+import { app, BrowserWindow, Tray, screen, shell } from 'electron';
 import * as path from 'path';
 
-import { server as localMessageServer } from './localMessageServer';
-
-let mainWindow: BrowserWindow | null = null;
+import './localMessageServer';
+import { setApplicationMenu } from './appMenu';
 
 if (process.env.NODE_ENV === 'development') {
   require('electron-debug')();
 }
+
+let cache: Record<string, unknown> = {};
 
 async function installExtensions(): Promise<unknown> {
   const installer = require('electron-devtools-installer');
@@ -28,7 +29,7 @@ app.on('ready', async () => {
     .getAllDisplays()
     .find(display => display.bounds.x !== 0 || display.bounds.y !== 0);
 
-  mainWindow = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     show: false,
     width: 1200,
     height: 760,
@@ -40,6 +41,8 @@ app.on('ready', async () => {
     }
   });
 
+  setApplicationMenu(mainWindow);
+
   mainWindow.loadURL(
     process.env.NODE_ENV === 'development'
       ? 'http://localhost:1234/'
@@ -47,15 +50,8 @@ app.on('ready', async () => {
   );
 
   mainWindow.on('ready-to-show', () => {
-    if (!mainWindow) {
-      throw new Error('"mainWindow" is not defined');
-    }
-    if (process.env.START_MINIMIZED) {
-      mainWindow.minimize();
-    } else {
-      mainWindow.show();
-      mainWindow.focus();
-    }
+    mainWindow.show();
+    mainWindow.focus();
   });
 
   function openLink(e: Electron.Event, url: string): void {
@@ -68,8 +64,32 @@ app.on('ready', async () => {
   mainWindow.webContents.on('will-navigate', openLink);
   mainWindow.webContents.on('new-window', openLink);
 
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-    localMessageServer.close();
+  mainWindow.on('close', e => {
+    e.preventDefault();
+
+    mainWindow.hide();
   });
+
+  const tray = new Tray(path.resolve(__dirname, '..', 'assets', 'tray.png'));
+
+  tray.on('click', () => {
+    if (mainWindow.isVisible()) {
+      mainWindow.hide();
+    } else {
+      mainWindow.loadURL(
+        process.env.NODE_ENV === 'development'
+          ? 'http://localhost:1234/'
+          : `file://${path.join(__dirname, 'index.html')}`
+      );
+
+      mainWindow.show();
+    }
+  });
+
+  app.on('quit', () => {
+    cache = {};
+  });
+
+  cache.tray = tray;
+  cache.mainWindow = mainWindow;
 });

@@ -14,8 +14,16 @@ translationContext.keys().forEach(k => {
   resources[language] = { translation: translationContext(k) };
 });
 
-export function initI18next(language = 'en'): void {
-  i18n.use(initReactI18next).init({
+export function initI18nextWithReact(language: string): void {
+  initI18next(language, true);
+}
+
+export function initI18next(language = 'en', withReact = false): void {
+  if (withReact) {
+    i18n.use(initReactI18next);
+  }
+
+  i18n.init({
     resources,
     lng: language,
     fallbackLng: 'en'
