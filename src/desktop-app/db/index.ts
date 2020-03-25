@@ -1,10 +1,11 @@
 import { resolve } from 'path';
 import { promises as fs, ensureDir } from 'fs-extra';
 
-import { Bucket, TRASH_BUCKET_NAME } from '../../shared/models/Bucket';
-import { Scrap } from '../../shared/models/Scrap';
+import { ROOT } from 'shared/constants';
+import { Bucket, TRASH_BUCKET_NAME } from 'shared/models/Bucket';
+import { Scrap } from 'shared/models/Scrap';
 
-const root = '/Users/LeoDT/tmp/scrapee';
+const root = ROOT;
 const bucketsRoot = resolve(root, 'buckets');
 const trashPath = resolve(bucketsRoot, TRASH_BUCKET_NAME);
 
@@ -13,12 +14,27 @@ export async function startup(): Promise<void> {
   await ensureDir(trashPath);
 }
 
-export async function readScrap(path: string): Promise<Scrap[]> {
+export async function readScrap(bucketPath: string, scrapId: string): Promise<Scrap | undefined> {
+  const scraps = await readScraps(resolve(bucketPath, 'scrap.json'));
+
+  if (scraps) {
+    return scraps.find(s => s.id === scrapId);
+  }
+
+  return undefined;
+}
+
+export async function readScraps(path: string, parent?: Bucket): Promise<Scrap[]> {
   const file = await fs.readFile(path);
   const json = JSON.parse(file.toString());
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const scrap = json.map((item: any) => Scrap.fromJSON(item));
+  const scrap = json.map((item: any) => {
+    const s = Scrap.fromJSON(item);
+    s.parent = parent;
+
+    return s;
+  });
 
   return scrap;
 }
@@ -45,7 +61,7 @@ export async function readBucket(path: string, parent?: Bucket): Promise<Array<B
           }
 
           if (de.isFile()) {
-            return readScrap(direntPath);
+            return readScraps(direntPath, parent);
           }
 
           return null;
@@ -79,9 +95,15 @@ export async function saveScrap(bucketPath: string, scrap: Scrap): Promise<void>
     console.log('no scrap found, will create');
   }
 
-  const json = file ? JSON.parse(file.toString()) : [];
+  const json: Scrap[] = file ? JSON.parse(file.toString()) : [];
 
-  json.push(scrap);
+  const exist = json.findIndex(s => s.id === scrap.id);
+
+  if (exist !== -1) {
+    json[exist] = scrap;
+  } else {
+    json.push(scrap);
+  }
 
   await fs.writeFile(scrapPath, JSON.stringify(json));
 

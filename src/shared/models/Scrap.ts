@@ -1,3 +1,4 @@
+import { omit } from 'lodash';
 import { DateTime } from 'luxon';
 import uuid from 'shared/utils/uuid';
 import { Bucket } from './Bucket';
@@ -35,6 +36,19 @@ export class Scrap {
     return scrap;
   }
 
+  static clone(scrap: Scrap): Scrap {
+    const clone = new Scrap(scrap.name);
+
+    clone.id = scrap.id;
+    clone.source = scrap.source;
+    clone.sourceUrl = scrap.sourceUrl;
+    clone.createdAt = scrap.createdAt;
+
+    clone.content = scrap.content.map(c => ({ ...c }));
+
+    return clone;
+  }
+
   id: string;
   name?: string;
   parent?: Bucket;
@@ -54,6 +68,10 @@ export class Scrap {
     this.createdAt = DateTime.local();
 
     this.content = [];
+  }
+
+  toJSON(): PlainObject {
+    return omit(this, 'parent');
   }
 
   generateKeyForNewContent(): number {

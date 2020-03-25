@@ -4,7 +4,7 @@ import { Bucket } from 'shared/models/Bucket';
 import { Scrap } from 'shared/models/Scrap';
 import { sanitizeHTMLElement } from 'shared/utils/html';
 import { DOMClipperApi } from './api';
-import { xPath } from '../utils/domPath';
+import { xPathWithWindow } from '../utils/domPath';
 
 export class Store {
   api: DOMClipperApi;
@@ -40,6 +40,7 @@ export class Store {
   }
 
   async saveScrap(els: HTMLElement[]): Promise<PlainObject> {
+    const xPath = xPathWithWindow(window.Node);
     const scrap = new Scrap(document.title);
     scrap.source = 'web-clipper';
     scrap.sourceUrl = location.href;

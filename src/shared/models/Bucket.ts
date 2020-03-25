@@ -18,6 +18,14 @@ export class Bucket {
     this.children = observable.array([], { deep: false });
   }
 
+  toJSON(): PlainObject {
+    return {
+      path: this.path,
+      children: this.children,
+      name: this.name
+    };
+  }
+
   get name(): string {
     return basename(this.path);
   }
