@@ -1,26 +1,35 @@
-import { getChildBuckets } from 'shared/models/Bucket';
-import { Scrap } from 'shared/models/Scrap';
-import { success } from 'shared/utils/localMessage';
+import { success, fail } from 'shared/utils/localMessage';
 
 import { Routes } from './types';
-import { readRootBucket, saveScrap } from '../db';
+import { db } from '../db/main';
+import { Bucket, walkBucket } from 'shared/models/Bucket';
 
 export const routes: Routes = {
   init: async ({ send }) => {
     send();
   },
-  buckets: async ({ send }) => {
-    const root = await readRootBucket();
+  rootBucket: async ({ send }) => {
+    const root = await db.loadBucket('');
 
-    send(success({ buckets: getChildBuckets(root) }));
+    // only buckets remained
+    walkBucket(root, b => {
+      if (b instanceof Bucket) {
+        b.children.replace(b.childrenBuckets);
+      }
+    });
+
+    send(success({ root }));
   },
   saveScrap: async ({ request, send }) => {
     const { bucketId, scrap } = request.body as { bucketId: string; scrap: PlainObject };
 
-    if (bucketId && scrap) {
-      await saveScrap(bucketId, Scrap.fromJSON(scrap));
-    }
+    if (typeof bucketId === 'string' && scrap) {
+      const bucket = await db.loadBucket(bucketId);
+      await db.createScrapFromJSON(scrap, bucket);
 
-    send();
+      send();
+    } else {
+      send(fail());
+    }
   }
 };

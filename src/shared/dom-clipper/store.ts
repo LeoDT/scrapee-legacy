@@ -1,4 +1,4 @@
-import { observable, IObservableArray } from 'mobx';
+import { observable, decorate } from 'mobx';
 
 import { Bucket } from 'shared/models/Bucket';
 import { Scrap } from 'shared/models/Scrap';
@@ -8,7 +8,7 @@ import { xPathWithWindow } from '../utils/domPath';
 
 export class Store {
   api: DOMClipperApi;
-  buckets: IObservableArray<Bucket> = observable.array([], { deep: false });
+  rootBucket?: Bucket;
 
   selectedBucket: Bucket | null = null;
 
@@ -16,12 +16,14 @@ export class Store {
     this.api = api;
   }
 
-  selectBucketWithId(path: string): boolean {
-    const hit = this.buckets.find(b => b.path === path);
+  selectBucketWithId(id: string): boolean {
+    /* const hit = this.buckets.find(b => b.id === id);
 
     if (hit) this.selectedBucket = hit;
 
-    return Boolean(hit);
+    return Boolean(hit); */
+
+    return true;
   }
 
   initApi(): Promise<{}> {
@@ -29,11 +31,11 @@ export class Store {
   }
 
   async loadBuckets(): Promise<PlainObject> {
-    const res = await this.api.loadBuckets();
+    const res = await this.api.loadRootBucket();
 
-    if (res.buckets) {
-      this.buckets.replace(res.buckets);
-      this.selectedBucket = res.buckets[0];
+    if (res.root) {
+      this.rootBucket = res.root;
+      this.selectedBucket = res.root;
     }
 
     return res;
@@ -41,7 +43,8 @@ export class Store {
 
   async saveScrap(els: HTMLElement[]): Promise<PlainObject> {
     const xPath = xPathWithWindow(window.Node);
-    const scrap = new Scrap(document.title);
+    const scrap = new Scrap('');
+    scrap.name = document.title;
     scrap.source = 'web-clipper';
     scrap.sourceUrl = location.href;
 
@@ -53,9 +56,14 @@ export class Store {
     });
 
     if (this.selectedBucket) {
-      return this.api.saveScrap({ bucketId: this.selectedBucket.path, scrap });
+      debugger;
+      return this.api.saveScrap({ bucketId: this.selectedBucket.id, scrap });
     }
 
     return {};
   }
 }
+
+decorate(Store, {
+  rootBucket: observable.ref
+});

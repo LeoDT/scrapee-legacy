@@ -16,12 +16,10 @@ export default function Detail(): JSX.Element {
   const [stickyObserver, setStickyObserver] = React.useState<StickyObserver | undefined>();
 
   React.useEffect(() => {
-    if (bucketId) {
-      const b = bucketStore.findBucketWithPath(decodeURIComponent(bucketId));
+    const b = bucketStore.findBucketWithPath(bucketId ? decodeURIComponent(bucketId) : '');
 
-      if (b) {
-        bucketStore.setSelectedBucket(b);
-      }
+    if (b) {
+      bucketStore.setSelectedBucket(b);
     }
   }, [bucketStore, bucketId]);
 
@@ -36,27 +34,33 @@ export default function Detail(): JSX.Element {
   }, [setStickyObserver]);
 
   return (
-    <StickyObserverContext.Provider value={stickyObserver}>
-      <div
-        className="bucket-detail flex-grow flex-shrink bg-white shadow overflow-x-hidden overflow-y-auto"
-        ref={rootRef}
-      >
-        <Observer>
-          {() => {
-            return bucketStore.selectedBucket ? (
-              <>
-                {bucketStore.selectedBucket.children.map(c => (
-                  <div key={c.id} className="border-b-2">
-                    {c instanceof Bucket ? <BucketDetail bucket={c} /> : <ScrapDetail scrap={c} />}
-                  </div>
-                ))}
-              </>
-            ) : (
-              <div className="empty" />
-            );
-          }}
-        </Observer>
-      </div>
-    </StickyObserverContext.Provider>
+    <div
+      className="bucket-detail flex-grow flex-shrink bg-white shadow overflow-x-hidden overflow-y-auto"
+      ref={rootRef}
+    >
+      {stickyObserver ? (
+        <StickyObserverContext.Provider value={stickyObserver}>
+          <Observer>
+            {() => {
+              return bucketStore.selectedBucket ? (
+                <>
+                  {bucketStore.selectedBucket.children.map(c => (
+                    <div key={c.id} className="border-b-2">
+                      {c instanceof Bucket ? (
+                        <BucketDetail bucket={c} />
+                      ) : (
+                        <ScrapDetail scrap={c} />
+                      )}
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div className="empty" />
+              );
+            }}
+          </Observer>
+        </StickyObserverContext.Provider>
+      ) : null}
+    </div>
   );
 }

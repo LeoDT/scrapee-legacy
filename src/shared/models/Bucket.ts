@@ -3,16 +3,17 @@ import { observable, computed, decorate, IObservableArray } from 'mobx';
 
 import { Scrap } from './Scrap';
 
+export const ROOT_BUCKET_NAME = '__ROOT__';
 export const TRASH_BUCKET_NAME = '__TRASH__';
 
 export class Bucket {
-  path: string;
+  id: string; // bucket id is file path
 
   parent?: Bucket;
   children: IObservableArray<Bucket | Scrap>;
 
-  constructor(path: string, parent?: Bucket) {
-    this.path = path;
+  constructor(id: string, parent?: Bucket) {
+    this.id = id;
 
     this.parent = parent;
     this.children = observable.array([], { deep: false });
@@ -20,18 +21,14 @@ export class Bucket {
 
   toJSON(): PlainObject {
     return {
-      path: this.path,
+      id: this.id,
       children: this.children,
       name: this.name
     };
   }
 
   get name(): string {
-    return basename(this.path);
-  }
-
-  get id(): string {
-    return this.path;
+    return basename(this.id);
   }
 
   get isRoot(): boolean {
@@ -48,7 +45,7 @@ export class Bucket {
 }
 
 decorate(Bucket, {
-  path: observable.ref,
+  id: observable.ref,
   parent: observable.ref,
 
   isRoot: computed,

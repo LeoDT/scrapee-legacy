@@ -21,17 +21,7 @@ export default function List(): JSX.Element {
         <Trans i18nKey="bucket_plural" />
       </div>
 
-      <Observer>
-        {() => (
-          <>
-            {store.rootBucket.childrenBuckets
-              .filter(b => !b.isTrash)
-              .map(bucket => (
-                <BucketListItem key={bucket.path} bucket={bucket} />
-              ))}
-          </>
-        )}
-      </Observer>
+      <Observer>{() => <BucketListItem bucket={store.db.rootBucket} />}</Observer>
     </div>
   );
 }

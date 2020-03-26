@@ -4,5 +4,6 @@
   "inspector:inspector_on": "Inspector On",
   "defaultNewBucketName": "New Bucket",
   "createBucket": "Create Bucket",
-  "deleteBucket": "Delete Bucket"
+  "deleteBucket": "Delete Bucket",
+  "rootBucketName": "Root Bucket"
 }

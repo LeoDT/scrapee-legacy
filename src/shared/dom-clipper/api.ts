@@ -4,6 +4,6 @@ import { Scrap } from 'shared/models/Scrap';
 export interface DOMClipperApi {
   // native requests
   init(): Promise<{}>;
-  loadBuckets(): Promise<{ buckets: Bucket[] }>;
+  loadRootBucket(): Promise<{ root: Bucket }>;
   saveScrap(request: { bucketId: string; scrap: Scrap }): Promise<{}>;
 }

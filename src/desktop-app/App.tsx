@@ -5,18 +5,25 @@ import { createCommonStores, CommonStoresContext } from 'shared/stores';
 
 import ModalManager from 'shared/components/Modal/Manager';
 import MainWindow from './components/MainWindow';
+import { DB, DBContext } from './db/renderer';
 
-function App(): JSX.Element {
+interface Props {
+  db: DB;
+}
+
+function App({ db }: Props): JSX.Element {
   const [commonStores] = React.useState(() => createCommonStores());
 
   return (
-    <CommonStoresContext.Provider value={commonStores}>
-      <>
-        <MainWindow />
+    <DBContext.Provider value={db}>
+      <CommonStoresContext.Provider value={commonStores}>
+        <>
+          <MainWindow />
 
-        <ModalManager />
-      </>
-    </CommonStoresContext.Provider>
+          <ModalManager />
+        </>
+      </CommonStoresContext.Provider>
+    </DBContext.Provider>
   );
 }
 

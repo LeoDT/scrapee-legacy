@@ -1,34 +1,32 @@
 import * as React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { readRootBucket } from '../../db';
+import { useDB } from '../../db/renderer';
 import { BucketsStore, BucketsStoreContext } from '../../stores/buckets';
 
 import List from './List';
 import Detail from './Detail';
 
 export default function index(): JSX.Element | null {
-  const [store, setStore] = React.useState<BucketsStore | null>();
+  const db = useDB();
+  const [store] = React.useState<BucketsStore>(() => {
+    const s = new BucketsStore(db);
 
-  React.useEffect(() => {
-    readRootBucket().then(bucket => {
-      const bucketStore = new BucketsStore(bucket);
-      setStore(bucketStore);
+    if (process.env.NODE_ENV === 'development') {
+      window.bucketStore = s;
+    }
 
-      if (process.env.NODE_ENV === 'development') {
-        window.bucketStore = bucketStore;
-      }
-    });
-  }, []);
+    return s;
+  });
 
-  return store ? (
+  return (
     <BucketsStoreContext.Provider value={store}>
       <div className="library-main flex flex-grow overflow-hidden">
         <List />
 
         <Switch>
           <Route exact path="/library">
-            <div className="flex-grow" />
+            <Detail />
           </Route>
           <Route exact path="/library/:bucketId">
             <Detail />
@@ -36,5 +34,5 @@ export default function index(): JSX.Element | null {
         </Switch>
       </div>
     </BucketsStoreContext.Provider>
-  ) : null;
+  );
 }

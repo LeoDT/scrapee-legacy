@@ -8,7 +8,7 @@ import { Scrap } from 'shared/models/Scrap';
 import { xPathWithWindow } from 'shared/utils/domPath';
 import uuid from 'shared/utils/uuid';
 
-import { readScrap, saveScrap } from '../../db';
+import { db } from '../../db/main';
 
 import { Job } from './base';
 
@@ -98,16 +98,6 @@ export class PersistMediaJob extends Job {
     this.medias = [];
   }
 
-  async prepare(): Promise<void> {
-    this.scrap = await readScrap(this.bucketId, this.scrapId);
-
-    if (this.scrap) {
-      this.medias = extractMedia(this.scrap);
-    } else {
-      this.fail('scrap not exists');
-    }
-  }
-
   async download(media: Media): Promise<Media> {
     return new Promise((resolve, reject) => {
       console.log('downloading');
@@ -133,7 +123,9 @@ export class PersistMediaJob extends Job {
   async start(): Promise<void> {
     super.start();
 
-    const scrap = await readScrap(this.bucketId, this.scrapId);
+    const bucket = await db.loadBucket(this.bucketId);
+
+    const scrap = await db.loadScrap(this.bucketId, bucket);
 
     if (scrap) {
       this.medias = extractMedia(scrap);
@@ -151,6 +143,6 @@ export class PersistMediaJob extends Job {
 
     const newScrap = replaceMedias(scrap, medias);
 
-    await saveScrap(this.bucketId, newScrap);
+    await db.updateScrap(scrap, newScrap);
   }
 }

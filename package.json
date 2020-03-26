@@ -90,6 +90,7 @@
   },
   "scripts": {
     "dev": "concurrently --names 'renderer,main,chrome' 'yarn run dev-renderer' 'yarn run dev-main' 'yarn run dev-chrome'",
+    "dev-browser": "concurrently --names 'renderer,chrome' 'yarn run dev-renderer' 'yarn run dev-chrome'",
     "dev-renderer": "cross-env NODE_ENV=development webpack-dev-server --config scripts/webpack.config.renderer.dev.babel.js",
     "dev-main": "cross-env ELECTRON_DISABLE_SECURITY_WARNINGS=1 NODE_ENV=development electron -r ./scripts/BabelRegister ./src/desktop-app/main.ts",
     "dev-chrome": "cross-env NODE_ENV=development webpack --watch --config scripts/webpack.config.chrome.dev.babel.js",

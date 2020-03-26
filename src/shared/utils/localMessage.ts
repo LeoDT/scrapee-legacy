@@ -1,4 +1,4 @@
-export type Resource = 'init' | 'buckets' | 'saveScrap';
+export type Resource = 'init' | 'rootBucket' | 'saveScrap';
 
 export interface Request {
   type: 'request';

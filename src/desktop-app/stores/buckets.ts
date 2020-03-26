@@ -1,24 +1,25 @@
-import { observable, decorate, computed } from 'mobx';
+import { observable, decorate } from 'mobx';
 
 import { createContextNoNullCheck } from 'shared/utils/react';
 
-import { Bucket, walkBucket } from 'shared/models/Bucket';
+import { Bucket } from 'shared/models/Bucket';
 import { Scrap } from 'shared/models/Scrap';
 
-import { createBucket, moveBucket } from '../db';
+import { DB } from '../db/renderer';
 
 export class BucketsStore {
-  rootBucket: Bucket;
+  db: DB;
+
   expandStatus: {
     [k: string]: boolean;
   };
-
   selectedBucket: Bucket | undefined;
 
-  constructor(rootBucket: Bucket) {
-    this.rootBucket = rootBucket;
+  constructor(db: DB) {
+    this.db = db;
+
     this.expandStatus = {};
-    this.selectedBucket = undefined;
+    this.selectedBucket = db.rootBucket;
   }
 
   toggleExpand(b: Bucket | Scrap): void {
@@ -29,40 +30,14 @@ export class BucketsStore {
     this.selectedBucket = b;
   }
 
-  get bucketIndex(): Map<string, Bucket> {
-    const index = new Map<string, Bucket>();
-
-    walkBucket(this.rootBucket, b => {
-      if (b instanceof Bucket) {
-        index.set(b.path, b);
-      }
-    });
-
-    return index;
-  }
-
-  get trashBucket(): Bucket {
-    return this.rootBucket.childrenBuckets.find(b => b.isTrash) as Bucket;
-  }
-
   findBucketWithPath(p: string): Bucket | undefined {
-    return this.bucketIndex.get(p);
-  }
-
-  async createBucket(parent: Bucket, name: string): Promise<Bucket> {
-    return createBucket(parent, name);
-  }
-
-  async moveBucketToTrash(b: Bucket): Promise<void> {
-    return moveBucket(b, this.trashBucket);
+    return this.db.bucketIndex.get(p);
   }
 }
 
 decorate(BucketsStore, {
-  rootBucket: observable.ref,
   expandStatus: observable,
-  selectedBucket: observable.ref,
-  bucketIndex: computed
+  selectedBucket: observable.ref
 });
 
 export const [useBucketsStore, BucketsStoreContext] = createContextNoNullCheck<BucketsStore>();

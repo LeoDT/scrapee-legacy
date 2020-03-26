@@ -1,4 +1,3 @@
-import { isEmpty } from 'lodash';
 import * as React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Observer } from 'mobx-react-lite';
@@ -20,14 +19,14 @@ interface Props {
 
 export default function BucketListItem({ bucket, level = 1 }: Props): JSX.Element {
   const { ui } = useCommonStores();
+  const { t } = useTranslation();
   const bucketStore = useBucketsStore();
   const history = useHistory();
-  const { t } = useTranslation();
 
   return (
     <Observer>
       {() => {
-        const expanded = bucketStore.expandStatus[bucket.path];
+        const expanded = bucketStore.expandStatus[bucket.id];
 
         return (
           <>
@@ -40,7 +39,7 @@ export default function BucketListItem({ bucket, level = 1 }: Props): JSX.Elemen
                       id: 'createBucket',
                       label: t('createBucket'),
                       click: async () => {
-                        await bucketStore.createBucket(bucket, t('defaultNewBucketName'));
+                        await bucketStore.db.createBucket(t('defaultNewBucketName'), bucket);
 
                         if (!expanded) {
                           bucketStore.toggleExpand(bucket);
@@ -52,13 +51,14 @@ export default function BucketListItem({ bucket, level = 1 }: Props): JSX.Elemen
                       label: t('deleteBucket'),
                       click: async () => {
                         if (await ui.modal.confirm('Are you sure?')) {
-                          await bucketStore.moveBucketToTrash(bucket);
+                          await bucketStore.db.trash(bucket);
 
                           if (expanded) {
                             bucketStore.toggleExpand(bucket);
                           }
                         }
-                      }
+                      },
+                      enabled: !bucket.isRoot
                     }
                   ],
                   { x: e.pageX, y: e.pageY }
@@ -71,7 +71,7 @@ export default function BucketListItem({ bucket, level = 1 }: Props): JSX.Elemen
                   bucketStore.selectedBucket === bucket ? 'bg-white' : 'hover:bg-gray-100'
                 )}
                 onClick={() => {
-                  history.push(`/library/${encodeURIComponent(bucket.path)}`);
+                  history.push(`/library/${encodeURIComponent(bucket.id)}`);
                 }}
               >
                 <div
@@ -81,22 +81,22 @@ export default function BucketListItem({ bucket, level = 1 }: Props): JSX.Elemen
                   )}
                   onClick={() => bucketStore.toggleExpand(bucket)}
                 >
-                  {isEmpty(bucket.childrenBuckets) ? null : (
-                    <AngleRightIcon
-                      className={cx('fill-current flex-grow-0 flex-shrink-0', {
-                        'transform rotate-90': expanded
-                      })}
-                    />
-                  )}
+                  <AngleRightIcon
+                    className={cx('fill-current flex-grow-0 flex-shrink-0', {
+                      'transform rotate-90': expanded
+                    })}
+                  />
                 </div>
-                <div className="flex-grow truncate">{bucket.name}</div>
+                <div className="flex-grow truncate">
+                  {bucket.isRoot ? t('rootBucketName') : bucket.name}
+                </div>
               </div>
             </div>
 
             {expanded ? (
               <>
                 {bucket.childrenBuckets.map(b => (
-                  <BucketListItem key={b.path} bucket={b} level={level + 1} />
+                  <BucketListItem key={b.id} bucket={b} level={level + 1} />
                 ))}
               </>
             ) : null}

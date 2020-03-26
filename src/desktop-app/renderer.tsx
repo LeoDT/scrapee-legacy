@@ -6,15 +6,15 @@ import { render } from 'react-dom';
 
 import { initI18nextWithReact } from 'shared/utils/i18n';
 
-import { startup } from './db';
+import { initDB } from './db/renderer';
 import App from './App';
 
 async function init(): Promise<void> {
-  await startup();
+  const db = await initDB();
 
   initI18nextWithReact(navigator.language);
 
-  render(<App />, document.getElementById('app'));
+  render(<App db={db} />, document.getElementById('app'));
 }
 
 init();

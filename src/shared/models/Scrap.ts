@@ -1,5 +1,6 @@
 import { omit } from 'lodash';
 import { DateTime } from 'luxon';
+
 import uuid from 'shared/utils/uuid';
 import { Bucket } from './Bucket';
 
@@ -15,18 +16,15 @@ export interface ScrapContent {
   xPath?: string;
 }
 
-export interface ScrapContentMeta {
-  key?: string | number;
-  type?: ScrapType;
-  originalHTML?: string;
-  xPath?: string;
-}
+export type ScrapContentMeta = Partial<Omit<ScrapContent, 'value'>>;
+
+export type RawScrap = Partial<Pick<Scrap, 'id' | 'name' | 'source' | 'sourceUrl' | 'content'>>;
 
 export class Scrap {
-  static fromJSON(json: PlainObject): Scrap {
-    const scrap = new Scrap(json.name as string);
+  static fromJSON(json: PlainObject, parent: Bucket): Scrap {
+    const scrap = new Scrap((json.id as string) ?? uuid.generate(), parent);
 
-    scrap.id = json.id as string;
+    scrap.name = json.name as string;
     scrap.source = json.source as ScrapSource;
     scrap.sourceUrl = json.sourceUrl as string;
     scrap.createdAt = DateTime.fromISO(json.createdAt as string);
@@ -36,8 +34,8 @@ export class Scrap {
     return scrap;
   }
 
-  static clone(scrap: Scrap): Scrap {
-    const clone = new Scrap(scrap.name);
+  static clone(scrap: Scrap, id?: string): Scrap {
+    const clone = new Scrap(id ?? uuid.generate());
 
     clone.id = scrap.id;
     clone.source = scrap.source;
@@ -50,9 +48,9 @@ export class Scrap {
   }
 
   id: string;
-  name?: string;
   parent?: Bucket;
 
+  name?: string;
   source?: ScrapSource;
   sourceUrl?: string;
 
@@ -60,11 +58,10 @@ export class Scrap {
 
   createdAt: DateTime;
 
-  constructor(name = '', parent?: Bucket) {
-    this.name = name;
+  constructor(id: string, parent?: Bucket) {
+    this.id = id;
     this.parent = parent;
 
-    this.id = uuid.new();
     this.createdAt = DateTime.local();
 
     this.content = [];
