@@ -1,2 +1,4 @@
 postcss.config.js
 tailwind.config.js
+
+src/core/types.d.ts

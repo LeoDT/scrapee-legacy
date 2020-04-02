@@ -10,3 +10,11 @@ interface Window {
 
 declare module '*.css?string';
 declare module 'react-shadow';
+
+declare module '*.graphql' {
+  import { DocumentNode } from 'graphql';
+
+  const node: DocumentNode;
+
+  export default node;
+}

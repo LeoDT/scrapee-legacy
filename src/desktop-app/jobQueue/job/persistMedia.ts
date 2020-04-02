@@ -8,7 +8,7 @@ import { Scrap } from 'shared/models/Scrap';
 import { xPathWithWindow } from 'shared/utils/domPath';
 import uuid from 'shared/utils/uuid';
 
-import { db } from '../../db/main';
+import { db } from '../../../core/storage/main';
 
 import { Job } from './base';
 

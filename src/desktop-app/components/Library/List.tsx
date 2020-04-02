@@ -1,14 +1,19 @@
 import * as React from 'react';
 import { cx, css } from 'emotion';
-import { Observer } from 'mobx-react-lite';
 import { Trans } from 'react-i18next';
 
-import { useBucketsStore } from '../../stores/buckets';
+import { TreeNode } from 'shared/utils/tree';
+import { Bucket } from 'core/client-types';
+import { useQueryLibraryState } from 'core/client/queries';
 
 import BucketListItem from './BucketListItem';
 
-export default function List(): JSX.Element {
-  const store = useBucketsStore();
+interface Props {
+  root: TreeNode<Bucket>;
+}
+
+export default function List({ root }: Props): JSX.Element {
+  const { data } = useQueryLibraryState();
 
   return (
     <div
@@ -21,7 +26,7 @@ export default function List(): JSX.Element {
         <Trans i18nKey="bucket_plural" />
       </div>
 
-      <Observer>{() => <BucketListItem bucket={store.db.rootBucket} />}</Observer>
+      <BucketListItem node={root} selectedBucketId={data?.libraryState.selectedBucketId} />
     </div>
   );
 }

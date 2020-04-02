@@ -24,9 +24,10 @@
 
     "baseUrl": "./src",
     "paths": {
-      "shared": ["./src/shared"]
+      "shared": ["./src/shared"],
+      "core": ["./src/core"]
     }
   },
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*", "scripts/apolloPlayground.js", "scripts/playground.ts"],
   "exclude": ["./scripts", "./postcss.config.js", "./tailwind.config.js"]
 }

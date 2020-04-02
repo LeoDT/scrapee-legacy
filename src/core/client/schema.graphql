@@ -1,0 +1,25 @@
+#import '../server/schema.graphql';
+
+extend type Bucket {
+  expanded: Boolean!
+  name: String!
+}
+
+extend type Scrap {
+  expanded: Boolean!
+}
+
+type LibraryState {
+  selectedBucketId: String!
+}
+
+extend type Query {
+  libraryState: LibraryState!
+}
+
+extend type Mutation {
+  toggleBucket(id: String!, expanded: Boolean): Boolean
+  selectBucket(id: String!): Boolean
+
+  toggleScrap(id: String!, expanded: Boolean): Boolean
+}

@@ -1,0 +1,68 @@
+generates:
+  ./src/core/server-types.d.ts:
+    schema:
+      - ./src/core/server/schema.graphql
+    config:
+      namingConvention:
+        typeNames: pascal-case#pascalCase
+      useIndexSignature: true
+      declarationKind: 'interface'
+      scalars:
+        IntString: number | string
+        DateTime: DateTime
+      preResolveTypes: true
+      contextType: GraphQLServerContext
+      nonOptionalTypename: true
+      skipTypename: true
+      maybeValue: T | undefined | null
+    plugins:
+      - add:
+          placement: prepend
+          content:
+            - '/* eslint-disable */'
+            - "import { DateTime } from 'luxon';"
+            - "import { GraphQLServerContext } from './server/types'"
+      - typescript
+      - typescript-resolvers
+
+  ./src/core/client-types.d.ts:
+    schema:
+      - ./src/core/server/schema.graphql
+      - ./src/core/client/schema.graphql
+    config:
+      namingConvention:
+        typeNames: pascal-case#pascalCase
+      useIndexSignature: true
+      declarationKind: 'interface'
+      scalars:
+        IntString: number | string
+        DateTime: DateTime
+      preResolveTypes: true
+      exportFragmentSpreadSubTypes: true
+      contextType: GraphQLClientContext
+      nonOptionalTypename: true
+      skipTypename: true
+      maybeValue: T | undefined | null
+    documents:
+      - 'src/**/*.{ts,tsx,graphql}':
+        noRequire: true
+    plugins:
+      - add:
+          placement: prepend
+          content:
+            - '/* eslint-disable */'
+            - "import { DateTime } from 'luxon';"
+            - "import { GraphQLClientContext } from './client/types'"
+      - typescript
+      - typescript-resolvers
+      - typescript-operations
+
+  ./src/core/introspection-result.ts:
+    schema:
+      - ./src/core/server/schema.graphql
+    plugins:
+      - add:
+          placement: prepend
+          content:
+            - '/* eslint-disable */'
+      - fragment-matcher

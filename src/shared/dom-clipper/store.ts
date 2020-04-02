@@ -1,27 +1,27 @@
-import { observable, decorate } from 'mobx';
+import { observable, IObservableArray } from 'mobx';
 
-import { Bucket } from 'shared/models/Bucket';
-import { Scrap } from 'shared/models/Scrap';
+import { ScrapSource, Scrap } from 'core/client-types';
+
 import { sanitizeHTMLElement } from 'shared/utils/html';
+
 import { DOMClipperApi } from './api';
 import { xPathWithWindow } from '../utils/domPath';
+import { addTextContentToScrap } from '../../core/storage/utils';
+import { DateTime } from 'luxon';
 
 export class Store {
   api: DOMClipperApi;
-  rootBucket?: Bucket;
 
-  selectedBucket: Bucket | null = null;
+  buckets: IObservableArray<string>;
+  selectedBucket = '';
 
   constructor(api: DOMClipperApi) {
     this.api = api;
+    this.buckets = observable.array([]);
   }
 
-  selectBucketWithId(id: string): boolean {
-    /* const hit = this.buckets.find(b => b.id === id);
-
-    if (hit) this.selectedBucket = hit;
-
-    return Boolean(hit); */
+  selectBucket(id: string): boolean {
+    this.selectedBucket = id;
 
     return true;
   }
@@ -31,11 +31,11 @@ export class Store {
   }
 
   async loadBuckets(): Promise<PlainObject> {
-    const res = await this.api.loadRootBucket();
+    const res = await this.api.loadBuckets();
 
-    if (res.root) {
-      this.rootBucket = res.root;
-      this.selectedBucket = res.root;
+    if (res.buckets) {
+      this.buckets.replace(res.buckets);
+      this.selectedBucket = res.buckets[0];
     }
 
     return res;
@@ -43,27 +43,26 @@ export class Store {
 
   async saveScrap(els: HTMLElement[]): Promise<PlainObject> {
     const xPath = xPathWithWindow(window.Node);
-    const scrap = new Scrap('');
-    scrap.name = document.title;
-    scrap.source = 'web-clipper';
-    scrap.sourceUrl = location.href;
+    const scrap: Scrap = {
+      id: '',
+      title: document.title,
+      source: ScrapSource.Clipper,
+      sourceUrl: location.href,
+      content: [],
+      createdAt: DateTime.local()
+    };
 
     els.forEach(el => {
-      scrap.addTextContent(sanitizeHTMLElement(el, { absolutifyURLs: true }), {
+      addTextContentToScrap(scrap, sanitizeHTMLElement(el, { absolutifyURLs: true }), {
         originalHTML: el.outerHTML,
         xPath: xPath(el)
       });
     });
 
     if (this.selectedBucket) {
-      debugger;
-      return this.api.saveScrap({ bucketId: this.selectedBucket.id, scrap });
+      return this.api.createScrap({ bucketId: this.selectedBucket, scrap });
     }
 
     return {};
   }
 }
-
-decorate(Store, {
-  rootBucket: observable.ref
-});

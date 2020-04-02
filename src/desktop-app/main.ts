@@ -1,14 +1,22 @@
 import { app, BrowserWindow, Tray, screen, shell } from 'electron';
 import * as path from 'path';
+import * as net from 'net';
 
-import './localMessageServer';
+import { createLocalMessageServer } from './localMessageServer';
 import { setApplicationMenu } from './appMenu';
+import { createServer as createGraphqlServer } from '../core/server/server';
+import { initServices } from './services';
 
 if (process.env.NODE_ENV === 'development') {
   require('electron-debug')();
 }
 
-let cache: Record<string, unknown> = {};
+let cache: Partial<{
+  tray: Tray;
+  mainWindow: BrowserWindow;
+  disposeGraphqlServer: () => void;
+  localMessageServer: net.Server;
+}> = {};
 
 async function installExtensions(): Promise<unknown> {
   const installer = require('electron-devtools-installer');
@@ -23,6 +31,9 @@ async function installExtensions(): Promise<unknown> {
 app.on('ready', async () => {
   if (process.env.NODE_ENV === 'development') {
     await installExtensions();
+    BrowserWindow.addDevToolsExtension(
+      '/Users/LeoDT/github/apollo-client-devtools/shells/webextension'
+    );
   }
 
   const externalDisplay = screen
@@ -86,10 +97,19 @@ app.on('ready', async () => {
     }
   });
 
-  app.on('quit', () => {
-    cache = {};
-  });
+  const services = await initServices();
+  const localMessageServer = createLocalMessageServer(services);
+  const disposeGraphqlServer = await createGraphqlServer(services);
 
   cache.tray = tray;
   cache.mainWindow = mainWindow;
+  cache.disposeGraphqlServer = disposeGraphqlServer;
+  cache.localMessageServer = localMessageServer;
+
+  app.on('quit', () => {
+    disposeGraphqlServer();
+    cache.localMessageServer?.close();
+
+    cache = {};
+  });
 });

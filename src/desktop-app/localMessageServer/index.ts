@@ -1,50 +1,55 @@
 import * as fs from 'fs';
 import * as net from 'net';
 
+import { LocalMessageServerContext } from './types';
 import { startRouter } from './router';
-import { routes } from './routes';
+import { createRoutes } from './routes';
 
-const server = net.createServer({ allowHalfOpen: true }, socket => {
-  const buffers: Buffer[] = [];
+export function createLocalMessageServer(context: LocalMessageServerContext): net.Server {
+  const routes = createRoutes(context);
 
-  socket.on('data', async data => {
-    buffers.push(data);
-  });
+  const server = net.createServer({ allowHalfOpen: true }, socket => {
+    const buffers: Buffer[] = [];
 
-  socket.on('end', async () => {
-    console.log('on end');
+    socket.on('data', async data => {
+      buffers.push(data);
+    });
 
-    const s = buffers.map(b => b.toString()).join('');
-    console.log(`on data: ${s}`);
+    socket.on('end', async () => {
+      console.log('on end');
 
-    try {
-      const request = JSON.parse(s);
+      const s = buffers.map(b => b.toString()).join('');
+      console.log(`on data: ${s}`);
 
-      if (request.type === 'request') {
-        await startRouter(socket, routes, request);
+      try {
+        const request = JSON.parse(s);
+
+        if (request.type === 'request') {
+          await startRouter(socket, routes, request);
+        }
+      } catch (e) {
+        console.log(e);
       }
-    } catch (e) {
-      console.log(e);
-    }
 
-    socket.end();
+      socket.end();
+    });
+
+    socket.on('error', error => {
+      console.error('error', error);
+    });
+
+    socket.on('close', () => {
+      console.log('close');
+    });
   });
 
-  socket.on('error', error => {
-    console.error('error', error);
-  });
+  const socketPath = '/tmp/scrapee.sock';
 
-  socket.on('close', () => {
-    console.log('close');
-  });
-});
+  if (fs.existsSync(socketPath)) {
+    fs.unlinkSync(socketPath);
+  }
 
-const socketPath = '/tmp/scrapee.sock';
+  server.listen(socketPath);
 
-if (fs.existsSync(socketPath)) {
-  fs.unlinkSync(socketPath);
+  return server;
 }
-
-server.listen(socketPath);
-
-export { server };

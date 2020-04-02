@@ -1,4 +1,9 @@
+import { BaseStorage as BucketStorage } from 'core/storage';
 import { Request, ResponseBody, Resource } from 'shared/utils/localMessage';
+
+export interface LocalMessageServerContext {
+  bucketStorage: BucketStorage;
+}
 
 export interface RouterContext {
   request: Request;

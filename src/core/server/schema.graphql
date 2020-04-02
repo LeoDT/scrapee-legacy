@@ -1,0 +1,92 @@
+scalar IntString
+scalar DateTime
+
+type Bucket {
+  id: ID!
+}
+
+input CreateBucketInput {
+  parentId: String!
+}
+
+enum ScrapSource {
+  clipper
+}
+
+enum ScrapType {
+  text
+  file
+}
+
+type ScrapContent {
+  key: IntString!
+  type: ScrapType!
+  value: String!
+
+  originalHTML: String
+  xPath: String
+}
+
+type Scrap {
+  id: ID!
+  parent: Bucket
+
+  title: String
+
+  source: ScrapSource
+  sourceUrl: String
+
+  content: [ScrapContent!]!
+
+  createdAt: DateTime!
+}
+
+enum JobStatus {
+  created
+  queued
+  started
+  failed
+  finished
+}
+
+interface Job {
+  type: String!
+  priority: Int!
+  status: JobStatus!
+  failReason: String
+}
+
+type PersistMediaJob implements Job {
+  type: String!
+  priority: Int!
+  status: JobStatus!
+  failReason: String
+  bucket: Bucket
+  scrap: Scrap
+}
+
+type BucketList {
+  buckets: [Bucket!]!
+}
+
+type BucketPayload {
+  paths: [String!]!
+  scraps: [Scrap!]
+}
+
+type Query {
+  test: String
+  allBuckets: BucketList!
+  bucket(id: String!): Bucket
+  scraps(bucketId: String!): [Scrap!]!
+  jobs: [Job]
+}
+
+type Mutation {
+  createBucket(input: CreateBucketInput): String
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
