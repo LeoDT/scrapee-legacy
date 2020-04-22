@@ -5,9 +5,8 @@ const { initPlayground } = require('../src/core/server/playground');
 async function start() {
   const server = await initPlayground();
 
-  server.listen(4000).then(({ url }) => {
-    console.log(`🚀 Server ready at ${url}`);
-  });
+  server.listen(4000);
+  console.log(`🚀 Server ready at http://localhost:4000`);
 }
 
 start();

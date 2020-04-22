@@ -5,7 +5,7 @@ declare type PlainObject = Record<string, unknown>;
 declare module '*.svg';
 
 interface Window {
-  bucketStore: any;
+  client: any;
 }
 
 declare module '*.css?string';

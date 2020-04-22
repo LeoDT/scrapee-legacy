@@ -1,16 +1,18 @@
-import gql from 'graphql-tag';
-
-export const bucketFields = gql`
+export const bucketFields = /* GraphQL */ `
   fragment bucketFields on Bucket {
+    __typename
+
     id
-    name @client
-    expanded @client
   }
 `;
 
-export const scrapFields = gql`
+export const scrapFields = /* GraphQL */ `
   fragment scrapFields on Scrap {
+    __typename
+
     id
+    bucketId
+
     title
 
     source
@@ -26,7 +28,5 @@ export const scrapFields = gql`
     }
 
     createdAt
-
-    expanded @client
   }
 `;

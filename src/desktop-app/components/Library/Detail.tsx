@@ -1,19 +1,18 @@
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
+import { reaction } from 'mobx';
+import { Observer } from 'mobx-react-lite';
 
 import { StickyObserver, StickyObserverContext } from 'shared/components/Sticky';
 
-import { useLazyQueryLoadScraps } from 'core/client/queries';
-import { useMutationSelectBucket } from 'core/client/mutations';
-
 import ScrapDetail from './ScrapDetail';
+import { useLibraryStore } from './store';
 
 export default function Detail(): JSX.Element {
   const { bucketId } = useParams<{ bucketId: string }>();
+  const libraryStore = useLibraryStore();
   const rootRef = React.useRef<HTMLDivElement>(null);
   const [stickyObserver, setStickyObserver] = React.useState<StickyObserver | undefined>();
-  const [loadScraps, { data: scrapsData }] = useLazyQueryLoadScraps();
-  const [selectBucket] = useMutationSelectBucket();
 
   React.useEffect(() => {
     const root = rootRef.current;
@@ -26,11 +25,20 @@ export default function Detail(): JSX.Element {
   }, [setStickyObserver]);
 
   React.useEffect(() => {
-    selectBucket({ variables: { id: bucketId || '' } });
-    loadScraps({ variables: { bucketId: bucketId || '' } });
-  }, [bucketId]);
+    const dispose = reaction(
+      () => libraryStore.buckets.find((b) => b.id === (bucketId || '')),
+      (bucket) => {
+        if (bucket) {
+          libraryStore.selectBucket(bucket);
+          libraryStore.loadScraps(bucket);
+        }
+      }
+    );
 
-  console.log(scrapsData);
+    return () => {
+      dispose();
+    };
+  }, [bucketId]);
 
   return (
     <div
@@ -39,11 +47,15 @@ export default function Detail(): JSX.Element {
     >
       {stickyObserver ? (
         <StickyObserverContext.Provider value={stickyObserver}>
-          <>
-            {scrapsData?.scraps?.map(s => (
-              <ScrapDetail key={s.id} scrap={s} />
-            ))}
-          </>
+          <Observer>
+            {() => (
+              <>
+                {libraryStore.scrapsOfSelectedBucket.map((s) => (
+                  <ScrapDetail key={s.id} scrap={s} />
+                ))}
+              </>
+            )}
+          </Observer>
         </StickyObserverContext.Provider>
       ) : null}
     </div>

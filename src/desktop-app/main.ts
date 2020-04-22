@@ -4,7 +4,7 @@ import * as net from 'net';
 
 import { createLocalMessageServer } from './localMessageServer';
 import { setApplicationMenu } from './appMenu';
-import { createServer as createGraphqlServer } from '../core/server/server';
+import { createServer as createGraphqlServer } from '../core/server';
 import { initServices } from './services';
 
 if (process.env.NODE_ENV === 'development') {
@@ -32,7 +32,7 @@ app.on('ready', async () => {
   if (process.env.NODE_ENV === 'development') {
     await installExtensions();
     BrowserWindow.addDevToolsExtension(
-      '/Users/LeoDT/github/apollo-client-devtools/shells/webextension'
+      '/Users/LeoDT/Library/Application Support/Google/Chrome/Default/Extensions/ncedobpgnmkhcmnnkcimnobpfepidadl/0.9.2_0/'
     );
   }
 

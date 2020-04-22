@@ -1,32 +1,24 @@
-import path from 'path';
-import { promises as fs } from 'fs';
-import gql from 'graphql-tag';
-import { ApolloServer, SchemaDirectiveVisitor } from 'apollo-server';
+import express, { Express } from 'express';
+import graphqlHTTP from 'express-graphql';
 
-import { createResolvers } from './resolvers';
+import { loadSchema } from './schema';
 import { createStorage } from '../storage';
 
-class ClientDirective extends SchemaDirectiveVisitor {
-  visitFieldDefinition(): void {
-    return;
-  }
-}
-
-export async function initPlayground(): Promise<ApolloServer> {
-  const defs = (await fs.readFile(path.resolve(__dirname, 'schema.graphql'))).toString();
-  const clientDefs = (
-    await fs.readFile(path.resolve(__dirname, 'clientSchema.graphql'))
-  ).toString();
+export async function initPlayground(): Promise<Express> {
   const bucketStorage = await createStorage()();
+  const schema = await loadSchema();
+  const app = express();
 
-  return new ApolloServer({
-    typeDefs: gql(`directive @client on FIELD_DEFINITION
-${defs}
-${clientDefs}`),
-    resolvers: createResolvers(),
-    schemaDirectives: {
-      client: ClientDirective
-    },
-    context: { bucketStorage }
-  });
+  app.use(
+    '/graphql',
+    graphqlHTTP({
+      schema,
+      context: {
+        bucketStorage,
+      },
+      graphiql: true,
+    })
+  );
+
+  return app;
 }

@@ -14,6 +14,8 @@ export const TRASH_ROOT = path.resolve(ROOT, TRASH_BUCKET_NAME);
 
 const SCRAP_FILENAME_REGEXP = /scrap.*\.json$/i;
 
+type BaseScrap = Omit<Scrap, 'bucketId'>;
+
 export class BaseStorage {
   root: string;
   rootRegex: RegExp;
@@ -37,7 +39,7 @@ export class BaseStorage {
   }
 
   walk(p: string, walker: (item: klaw.Item) => void): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       klaw(this.resolve(p))
         .on('data', walker)
         .on('end', () => resolve());
@@ -47,7 +49,7 @@ export class BaseStorage {
   async showAllBuckets(): Promise<string[]> {
     const buckets: string[] = [];
 
-    await this.walk(this.root, item => {
+    await this.walk(this.root, (item) => {
       if (item.stats.isDirectory()) {
         buckets.push(this.unresolve(item.path));
       }
@@ -56,23 +58,26 @@ export class BaseStorage {
     return buckets;
   }
 
-  async showBucket(p: string, withScraps = false): Promise<{ paths: string[]; scraps?: Scrap[] }> {
+  async showBucket(
+    p: string,
+    withScraps = false
+  ): Promise<{ paths: string[]; scraps?: BaseScrap[] }> {
     const fullPath = this.resolve(p);
     const paths: string[] = [];
 
-    await this.walk(fullPath, item => {
+    await this.walk(fullPath, (item) => {
       if (item.path !== fullPath) paths.push(this.unresolve(item.path));
     });
 
-    const scraps: Scrap[] = [];
+    const scraps: BaseScrap[] = [];
 
     if (withScraps) {
       const scrapPromises = paths
-        .filter(p => this.isScrapFile(p))
-        .map(async p => this.readScrap(this.resolve(p)));
+        .filter((p) => this.isScrapFile(p))
+        .map(async (p) => this.readScrap(this.resolve(p)));
 
       const results = await Promise.allSettled(scrapPromises);
-      results.forEach(r => {
+      results.forEach((r) => {
         if (r.status === 'fulfilled') {
           scraps.push(r.value);
         } else {
@@ -84,7 +89,7 @@ export class BaseStorage {
     return { paths, scraps };
   }
 
-  async readScrap(fullPath: string): Promise<Scrap> {
+  async readScrap(fullPath: string): Promise<BaseScrap> {
     const file = (await fs.readFile(fullPath)).toString();
 
     return JSON.parse(file, (k, v) => {
@@ -102,10 +107,10 @@ export class BaseStorage {
 
     await fs.mkdir(fullPath);
 
-    return fullPath;
+    return this.unresolve(fullPath);
   }
 
-  async createScrapFromJSON(json: Record<string, unknown>, parent: string): Promise<Scrap> {
+  async createScrapFromJSON(json: Record<string, unknown>, parent: string): Promise<BaseScrap> {
     const id = path.join(parent, `scrap.${uuid.generate()}.json`);
     const scrap = { ...json, id } as Scrap;
     const fullPath = this.resolve(id);
@@ -116,7 +121,7 @@ export class BaseStorage {
     return scrap;
   }
 
-  async updateScrap(scrapId: string, update: Record<string, unknown>): Promise<Scrap> {
+  async updateScrap(scrapId: string, update: Record<string, unknown>): Promise<BaseScrap> {
     const fullPath = this.resolve(scrapId);
 
     const scrap = await this.readScrap(fullPath);
@@ -130,23 +135,23 @@ export class BaseStorage {
     const dstFullPath = path.resolve(this.resolve(dst), path.basename(srcFullPath));
 
     await fsExtra.move(srcFullPath, dstFullPath, {
-      overwrite
+      overwrite,
     });
   }
 
   async trash(src: string): Promise<void> {
     await fsExtra.ensureDir(TRASH_ROOT);
 
-    let srcFullPath = this.resolve(src);
+    const srcFullPath = this.resolve(src);
     const basename = path.basename(srcFullPath);
-    const dstFullPath = path.resolve(TRASH_ROOT, basename);
+    let dstFullPath = path.resolve(TRASH_ROOT, basename);
 
     try {
       await fsExtra.move(srcFullPath, dstFullPath, { overwrite: false });
     } catch (e) {
       if (e.message === 'dest already exists.') {
         const suffix = DateTime.local().toFormat('yyyy-LL-dd HH:mm:ss');
-        srcFullPath = path.resolve(srcFullPath, `${basename}(${suffix})`);
+        dstFullPath = path.resolve(TRASH_ROOT, `${basename}(${suffix})`);
 
         await fsExtra.move(srcFullPath, dstFullPath, { overwrite: false });
       }

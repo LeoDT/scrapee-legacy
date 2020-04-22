@@ -1,5 +1,5 @@
 generates:
-  ./src/core/server-types.d.ts:
+  ./src/core/server-types.ts:
     schema:
       - ./src/core/server/schema.graphql
     config:
@@ -25,10 +25,9 @@ generates:
       - typescript
       - typescript-resolvers
 
-  ./src/core/client-types.d.ts:
+  ./src/core/client-types.ts:
     schema:
       - ./src/core/server/schema.graphql
-      - ./src/core/client/schema.graphql
     config:
       namingConvention:
         typeNames: pascal-case#pascalCase
@@ -41,8 +40,8 @@ generates:
       exportFragmentSpreadSubTypes: true
       contextType: GraphQLClientContext
       nonOptionalTypename: true
-      skipTypename: true
       maybeValue: T | undefined | null
+      dedupeOperationSuffix: true
     documents:
       - 'src/**/*.{ts,tsx,graphql}':
         noRequire: true
@@ -52,17 +51,11 @@ generates:
           content:
             - '/* eslint-disable */'
             - "import { DateTime } from 'luxon';"
-            - "import { GraphQLClientContext } from './client/types'"
       - typescript
-      - typescript-resolvers
       - typescript-operations
 
-  ./src/core/introspection-result.ts:
+  ./src/core/introspection.json:
     schema:
       - ./src/core/server/schema.graphql
     plugins:
-      - add:
-          placement: prepend
-          content:
-            - '/* eslint-disable */'
-      - fragment-matcher
+      - introspection

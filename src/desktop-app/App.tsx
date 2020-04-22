@@ -11,11 +11,11 @@ function App(): JSX.Element {
 
   return (
     <CommonStoresContext.Provider value={commonStores}>
-      <>
+      <React.Suspense fallback={<div>Loading</div>}>
         <MainWindow />
 
         <ModalManager />
-      </>
+      </React.Suspense>
     </CommonStoresContext.Provider>
   );
 }

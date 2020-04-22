@@ -5,7 +5,7 @@ export const resolvers: Resolvers = {
     async scraps(_, { bucketId }, { bucketStorage }) {
       const { scraps } = await bucketStorage.showBucket(bucketId, true);
 
-      return scraps || [];
-    }
-  }
+      return (scraps || []).map((s) => ({ ...s, bucketId }));
+    },
+  },
 };

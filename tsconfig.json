@@ -28,6 +28,6 @@
       "core": ["./src/core"]
     }
   },
-  "include": ["./src/**/*", "scripts/apolloPlayground.js", "scripts/playground.ts"],
+  "include": ["./src/**/*", "scripts/graphqlPlayground.js", "scripts/playground.ts"],
   "exclude": ["./scripts", "./postcss.config.js", "./tailwind.config.js"]
 }

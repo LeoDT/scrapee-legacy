@@ -19,9 +19,12 @@ export function setApplicationMenu(mainWindow: BrowserWindow): void {
           click() {
             mainWindow.destroy();
             app.quit();
-          }
-        }
-      ]
+          },
+        },
+      ],
+    },
+    {
+      role: 'editMenu',
     },
     {
       label: 'View',
@@ -34,13 +37,13 @@ export function setApplicationMenu(mainWindow: BrowserWindow): void {
         { role: 'zoomIn' },
         { role: 'zoomOut' },
         { type: 'separator' },
-        { role: 'togglefullscreen' }
-      ]
+        { role: 'togglefullscreen' },
+      ],
     },
     {
       role: 'window',
-      submenu: [{ role: 'minimize' }, { role: 'close' }]
-    }
+      submenu: [{ role: 'minimize' }, { role: 'close' }],
+    },
   ];
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));

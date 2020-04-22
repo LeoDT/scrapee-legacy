@@ -1,12 +1,21 @@
 scalar IntString
 scalar DateTime
 
-type Bucket {
+interface Node {
+  id: ID!
+}
+
+type Bucket implements Node {
   id: ID!
 }
 
 input CreateBucketInput {
-  parentId: String!
+  id: ID!
+  parentId: ID!
+}
+
+input TrashBucketInput {
+  id: ID!
 }
 
 enum ScrapSource {
@@ -27,9 +36,9 @@ type ScrapContent {
   xPath: String
 }
 
-type Scrap {
+type Scrap implements Node {
   id: ID!
-  parent: Bucket
+  bucketId: ID!
 
   title: String
 
@@ -56,17 +65,14 @@ interface Job {
   failReason: String
 }
 
-type PersistMediaJob implements Job {
+type PersistMediaJob implements Node & Job {
+  id: ID!
   type: String!
   priority: Int!
   status: JobStatus!
   failReason: String
   bucket: Bucket
   scrap: Scrap
-}
-
-type BucketList {
-  buckets: [Bucket!]!
 }
 
 type BucketPayload {
@@ -76,14 +82,15 @@ type BucketPayload {
 
 type Query {
   test: String
-  allBuckets: BucketList!
+  buckets: [Bucket!]!
   bucket(id: String!): Bucket
-  scraps(bucketId: String!): [Scrap!]!
+  scraps(bucketId: ID!): [Scrap!]!
   jobs: [Job]
 }
 
 type Mutation {
-  createBucket(input: CreateBucketInput): String
+  createBucket(input: CreateBucketInput!): Bucket
+  trashBucket(input: TrashBucketInput!): Boolean
 }
 
 schema {

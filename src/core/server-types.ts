@@ -16,30 +16,50 @@ export interface Scalars {
   DateTime: DateTime;
 }
 
-export interface Bucket {
+
+
+export interface Node {
   id: Scalars['ID'];
 }
 
-export interface BucketList {
-  buckets: Array<Bucket>;
-}
-
-export interface BucketPayload {
-  paths: Array<Scalars['String']>;
-  scraps?: Maybe<Array<Scrap>>;
+export interface Bucket  extends Node {
+  id: Scalars['ID'];
 }
 
 export interface CreateBucketInput {
-  parentId: Scalars['String'];
+  id: Scalars['ID'];
+  parentId: Scalars['ID'];
 }
 
+export interface TrashBucketInput {
+  id: Scalars['ID'];
+}
 
+export enum ScrapSource {
+  Clipper = 'clipper'
+}
 
-export interface Job {
-  type: Scalars['String'];
-  priority: Scalars['Int'];
-  status: JobStatus;
-  failReason?: Maybe<Scalars['String']>;
+export enum ScrapType {
+  Text = 'text',
+  File = 'file'
+}
+
+export interface ScrapContent {
+  key: Scalars['IntString'];
+  type: ScrapType;
+  value: Scalars['String'];
+  originalHTML?: Maybe<Scalars['String']>;
+  xPath?: Maybe<Scalars['String']>;
+}
+
+export interface Scrap  extends Node {
+  id: Scalars['ID'];
+  bucketId: Scalars['ID'];
+  title?: Maybe<Scalars['String']>;
+  source?: Maybe<ScrapSource>;
+  sourceUrl?: Maybe<Scalars['String']>;
+  content: Array<ScrapContent>;
+  createdAt: Scalars['DateTime'];
 }
 
 export enum JobStatus {
@@ -50,16 +70,15 @@ export enum JobStatus {
   Finished = 'finished'
 }
 
-export interface Mutation {
-  createBucket?: Maybe<Scalars['String']>;
+export interface Job {
+  type: Scalars['String'];
+  priority: Scalars['Int'];
+  status: JobStatus;
+  failReason?: Maybe<Scalars['String']>;
 }
 
-
-export interface MutationCreateBucketArgs {
-  input?: Maybe<CreateBucketInput>;
-}
-
-export interface PersistMediaJob  extends Job {
+export interface PersistMediaJob  extends Node, Job {
+  id: Scalars['ID'];
   type: Scalars['String'];
   priority: Scalars['Int'];
   status: JobStatus;
@@ -68,9 +87,14 @@ export interface PersistMediaJob  extends Job {
   scrap?: Maybe<Scrap>;
 }
 
+export interface BucketPayload {
+  paths: Array<Scalars['String']>;
+  scraps?: Maybe<Array<Scrap>>;
+}
+
 export interface Query {
   test?: Maybe<Scalars['String']>;
-  allBuckets: BucketList;
+  buckets: Array<Bucket>;
   bucket?: Maybe<Bucket>;
   scraps: Array<Scrap>;
   jobs?: Maybe<Array<Maybe<Job>>>;
@@ -83,34 +107,22 @@ export interface QueryBucketArgs {
 
 
 export interface QueryScrapsArgs {
-  bucketId: Scalars['String'];
+  bucketId: Scalars['ID'];
 }
 
-export interface Scrap {
-  id: Scalars['ID'];
-  parent?: Maybe<Bucket>;
-  title?: Maybe<Scalars['String']>;
-  source?: Maybe<ScrapSource>;
-  sourceUrl?: Maybe<Scalars['String']>;
-  content: Array<ScrapContent>;
-  createdAt: Scalars['DateTime'];
+export interface Mutation {
+  createBucket?: Maybe<Bucket>;
+  trashBucket?: Maybe<Scalars['Boolean']>;
 }
 
-export interface ScrapContent {
-  key: Scalars['IntString'];
-  type: ScrapType;
-  value: Scalars['String'];
-  originalHTML?: Maybe<Scalars['String']>;
-  xPath?: Maybe<Scalars['String']>;
+
+export interface MutationCreateBucketArgs {
+  input: CreateBucketInput;
 }
 
-export enum ScrapSource {
-  Clipper = 'clipper'
-}
 
-export enum ScrapType {
-  Text = 'text',
-  File = 'file'
+export interface MutationTrashBucketArgs {
+  input: TrashBucketInput;
 }
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -187,112 +199,67 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
-  Query: ResolverTypeWrapper<{}>,
   String: ResolverTypeWrapper<Scalars['String']>,
-  BucketList: ResolverTypeWrapper<BucketList>,
-  Bucket: ResolverTypeWrapper<Bucket>,
-  ID: ResolverTypeWrapper<Scalars['ID']>,
-  Scrap: ResolverTypeWrapper<Scrap>,
-  ScrapSource: ScrapSource,
-  ScrapContent: ResolverTypeWrapper<ScrapContent>,
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
   IntString: ResolverTypeWrapper<Scalars['IntString']>,
-  ScrapType: ScrapType,
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>,
+  Node: ResolversTypes['Bucket'] | ResolversTypes['Scrap'] | ResolversTypes['PersistMediaJob'],
+  ID: ResolverTypeWrapper<Scalars['ID']>,
+  Bucket: ResolverTypeWrapper<Bucket>,
+  CreateBucketInput: CreateBucketInput,
+  TrashBucketInput: TrashBucketInput,
+  ScrapSource: ScrapSource,
+  ScrapType: ScrapType,
+  ScrapContent: ResolverTypeWrapper<ScrapContent>,
+  Scrap: ResolverTypeWrapper<Scrap>,
+  JobStatus: JobStatus,
   Job: ResolversTypes['PersistMediaJob'],
   Int: ResolverTypeWrapper<Scalars['Int']>,
-  JobStatus: JobStatus,
-  Mutation: ResolverTypeWrapper<{}>,
-  CreateBucketInput: CreateBucketInput,
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>,
   PersistMediaJob: ResolverTypeWrapper<PersistMediaJob>,
   BucketPayload: ResolverTypeWrapper<BucketPayload>,
+  Query: ResolverTypeWrapper<{}>,
+  Mutation: ResolverTypeWrapper<{}>,
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
-  Query: {},
   String: Scalars['String'],
-  BucketList: BucketList,
-  Bucket: Bucket,
-  ID: Scalars['ID'],
-  Scrap: Scrap,
-  ScrapSource: ScrapSource,
-  ScrapContent: ScrapContent,
+  Boolean: Scalars['Boolean'],
   IntString: Scalars['IntString'],
-  ScrapType: ScrapType,
   DateTime: Scalars['DateTime'],
+  Node: ResolversParentTypes['Bucket'] | ResolversParentTypes['Scrap'] | ResolversParentTypes['PersistMediaJob'],
+  ID: Scalars['ID'],
+  Bucket: Bucket,
+  CreateBucketInput: CreateBucketInput,
+  TrashBucketInput: TrashBucketInput,
+  ScrapSource: ScrapSource,
+  ScrapType: ScrapType,
+  ScrapContent: ScrapContent,
+  Scrap: Scrap,
+  JobStatus: JobStatus,
   Job: ResolversParentTypes['PersistMediaJob'],
   Int: Scalars['Int'],
-  JobStatus: JobStatus,
-  Mutation: {},
-  CreateBucketInput: CreateBucketInput,
-  Boolean: Scalars['Boolean'],
   PersistMediaJob: PersistMediaJob,
   BucketPayload: BucketPayload,
+  Query: {},
+  Mutation: {},
 }>;
-
-export type BucketResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Bucket'] = ResolversParentTypes['Bucket']> = ResolversObject<{
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  __isTypeOf?: isTypeOfResolverFn<ParentType>,
-}>;
-
-export type BucketListResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['BucketList'] = ResolversParentTypes['BucketList']> = ResolversObject<{
-  buckets?: Resolver<Array<ResolversTypes['Bucket']>, ParentType, ContextType>,
-  __isTypeOf?: isTypeOfResolverFn<ParentType>,
-}>;
-
-export type BucketPayloadResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['BucketPayload'] = ResolversParentTypes['BucketPayload']> = ResolversObject<{
-  paths?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
-  scraps?: Resolver<Maybe<Array<ResolversTypes['Scrap']>>, ParentType, ContextType>,
-  __isTypeOf?: isTypeOfResolverFn<ParentType>,
-}>;
-
-export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
-  name: 'DateTime'
-}
 
 export interface IntStringScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['IntString'], any> {
   name: 'IntString'
 }
 
-export type JobResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Job'] = ResolversParentTypes['Job']> = ResolversObject<{
-  __resolveType: TypeResolveFn<'PersistMediaJob', ParentType, ContextType>,
-  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  priority?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['JobStatus'], ParentType, ContextType>,
-  failReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-}>;
+export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
+  name: 'DateTime'
+}
 
-export type MutationResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
-  createBucket?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationCreateBucketArgs, never>>,
-}>;
-
-export type PersistMediaJobResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['PersistMediaJob'] = ResolversParentTypes['PersistMediaJob']> = ResolversObject<{
-  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
-  priority?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
-  status?: Resolver<ResolversTypes['JobStatus'], ParentType, ContextType>,
-  failReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  bucket?: Resolver<Maybe<ResolversTypes['Bucket']>, ParentType, ContextType>,
-  scrap?: Resolver<Maybe<ResolversTypes['Scrap']>, ParentType, ContextType>,
-  __isTypeOf?: isTypeOfResolverFn<ParentType>,
-}>;
-
-export type QueryResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
-  test?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  allBuckets?: Resolver<ResolversTypes['BucketList'], ParentType, ContextType>,
-  bucket?: Resolver<Maybe<ResolversTypes['Bucket']>, ParentType, ContextType, RequireFields<QueryBucketArgs, 'id'>>,
-  scraps?: Resolver<Array<ResolversTypes['Scrap']>, ParentType, ContextType, RequireFields<QueryScrapsArgs, 'bucketId'>>,
-  jobs?: Resolver<Maybe<Array<Maybe<ResolversTypes['Job']>>>, ParentType, ContextType>,
-}>;
-
-export type ScrapResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Scrap'] = ResolversParentTypes['Scrap']> = ResolversObject<{
+export type NodeResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Node'] = ResolversParentTypes['Node']> = ResolversObject<{
+  __resolveType: TypeResolveFn<'Bucket' | 'Scrap' | 'PersistMediaJob', ParentType, ContextType>,
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
-  parent?: Resolver<Maybe<ResolversTypes['Bucket']>, ParentType, ContextType>,
-  title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  source?: Resolver<Maybe<ResolversTypes['ScrapSource']>, ParentType, ContextType>,
-  sourceUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  content?: Resolver<Array<ResolversTypes['ScrapContent']>, ParentType, ContextType>,
-  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+}>;
+
+export type BucketResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Bucket'] = ResolversParentTypes['Bucket']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   __isTypeOf?: isTypeOfResolverFn<ParentType>,
 }>;
 
@@ -305,18 +272,67 @@ export type ScrapContentResolvers<ContextType = GraphQLServerContext, ParentType
   __isTypeOf?: isTypeOfResolverFn<ParentType>,
 }>;
 
+export type ScrapResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Scrap'] = ResolversParentTypes['Scrap']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  bucketId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  source?: Resolver<Maybe<ResolversTypes['ScrapSource']>, ParentType, ContextType>,
+  sourceUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  content?: Resolver<Array<ResolversTypes['ScrapContent']>, ParentType, ContextType>,
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn<ParentType>,
+}>;
+
+export type JobResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Job'] = ResolversParentTypes['Job']> = ResolversObject<{
+  __resolveType: TypeResolveFn<'PersistMediaJob', ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  priority?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['JobStatus'], ParentType, ContextType>,
+  failReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+}>;
+
+export type PersistMediaJobResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['PersistMediaJob'] = ResolversParentTypes['PersistMediaJob']> = ResolversObject<{
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
+  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>,
+  priority?: Resolver<ResolversTypes['Int'], ParentType, ContextType>,
+  status?: Resolver<ResolversTypes['JobStatus'], ParentType, ContextType>,
+  failReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  bucket?: Resolver<Maybe<ResolversTypes['Bucket']>, ParentType, ContextType>,
+  scrap?: Resolver<Maybe<ResolversTypes['Scrap']>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn<ParentType>,
+}>;
+
+export type BucketPayloadResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['BucketPayload'] = ResolversParentTypes['BucketPayload']> = ResolversObject<{
+  paths?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
+  scraps?: Resolver<Maybe<Array<ResolversTypes['Scrap']>>, ParentType, ContextType>,
+  __isTypeOf?: isTypeOfResolverFn<ParentType>,
+}>;
+
+export type QueryResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
+  test?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  buckets?: Resolver<Array<ResolversTypes['Bucket']>, ParentType, ContextType>,
+  bucket?: Resolver<Maybe<ResolversTypes['Bucket']>, ParentType, ContextType, RequireFields<QueryBucketArgs, 'id'>>,
+  scraps?: Resolver<Array<ResolversTypes['Scrap']>, ParentType, ContextType, RequireFields<QueryScrapsArgs, 'bucketId'>>,
+  jobs?: Resolver<Maybe<Array<Maybe<ResolversTypes['Job']>>>, ParentType, ContextType>,
+}>;
+
+export type MutationResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  createBucket?: Resolver<Maybe<ResolversTypes['Bucket']>, ParentType, ContextType, RequireFields<MutationCreateBucketArgs, 'input'>>,
+  trashBucket?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationTrashBucketArgs, 'input'>>,
+}>;
+
 export type Resolvers<ContextType = GraphQLServerContext> = ResolversObject<{
-  Bucket?: BucketResolvers<ContextType>,
-  BucketList?: BucketListResolvers<ContextType>,
-  BucketPayload?: BucketPayloadResolvers<ContextType>,
-  DateTime?: GraphQLScalarType,
   IntString?: GraphQLScalarType,
-  Job?: JobResolvers,
-  Mutation?: MutationResolvers<ContextType>,
-  PersistMediaJob?: PersistMediaJobResolvers<ContextType>,
-  Query?: QueryResolvers<ContextType>,
-  Scrap?: ScrapResolvers<ContextType>,
+  DateTime?: GraphQLScalarType,
+  Node?: NodeResolvers,
+  Bucket?: BucketResolvers<ContextType>,
   ScrapContent?: ScrapContentResolvers<ContextType>,
+  Scrap?: ScrapResolvers<ContextType>,
+  Job?: JobResolvers,
+  PersistMediaJob?: PersistMediaJobResolvers<ContextType>,
+  BucketPayload?: BucketPayloadResolvers<ContextType>,
+  Query?: QueryResolvers<ContextType>,
+  Mutation?: MutationResolvers<ContextType>,
 }>;
 
 

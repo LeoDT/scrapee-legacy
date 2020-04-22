@@ -5,28 +5,28 @@ export interface TreeNode<T> {
 }
 
 export function findChild<T>(node: TreeNode<T>, childId: string): TreeNode<T> | undefined {
-  return node.children.find(c => c.id === childId);
+  return node.children.find((c) => c.id === childId);
 }
 
 export function treeFromPaths<T>(data: T[], identifier: (data: T) => string): TreeNode<T> {
-  const rootData = data.find(d => identifier(d) === '');
+  const rootData = data.find((d) => identifier(d) === '');
 
   if (!rootData) throw Error('no root node found');
 
   const root: TreeNode<T> = {
     id: '',
     data: rootData,
-    children: []
+    children: [],
   };
 
-  data.forEach(d => {
+  data.forEach((d) => {
     const id = identifier(d);
 
     if (id !== '') {
       const splitted = id.split('/');
       let cursor: TreeNode<T> = root;
 
-      splitted.forEach(l => {
+      splitted.forEach((l) => {
         const hit = findChild(cursor, l);
 
         if (hit) {
@@ -35,7 +35,7 @@ export function treeFromPaths<T>(data: T[], identifier: (data: T) => string): Tr
           const newNode = {
             id: l,
             data: d,
-            children: []
+            children: [],
           };
 
           cursor.children.push(newNode);
