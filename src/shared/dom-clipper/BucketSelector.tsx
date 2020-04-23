@@ -5,6 +5,7 @@ import Select from 'shared/components/Select';
 
 import { useStore } from './context';
 import { useTranslation } from 'react-i18next';
+import { isRootBucket } from '../../core/storage/utils';
 
 export default function BucketSelector(): JSX.Element {
   const { t } = useTranslation();
@@ -13,19 +14,14 @@ export default function BucketSelector(): JSX.Element {
     store.selectBucketWithId(e.target.value);
   }, []);
 
-  React.useEffect(() => {
-    store.loadBuckets();
-  }, []);
-
   return (
     <Observer>
       {() => (
         <Select
-          options={
-            store.rootBucket
-              ? [{ text: t('rootBucketName'), value: store.rootBucket.id || '__ROOT__' }]
-              : []
-          }
+          options={store.buckets.map((b) => ({
+            value: b.id,
+            text: isRootBucket(b.id) ? t('rootBucketName') : b.id,
+          }))}
           onChange={handleChange}
         />
       )}

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import { useClient } from 'core/client/ipcClient';
+import { useClient } from '../../ipcClient';
 
 import List from './List';
 import Detail from './Detail';

@@ -51,14 +51,31 @@ export interface ScrapContent {
   xPath?: Maybe<Scalars['String']>;
 }
 
+export interface ScrapContentInput {
+  key?: Maybe<Scalars['IntString']>;
+  type: ScrapType;
+  value: Scalars['String'];
+  originalHTML?: Maybe<Scalars['String']>;
+  xPath?: Maybe<Scalars['String']>;
+}
+
 export interface Scrap  extends Node {
    __typename: 'Scrap';
   id: Scalars['ID'];
   bucketId: Scalars['ID'];
   title?: Maybe<Scalars['String']>;
+  content: Array<ScrapContent>;
   source?: Maybe<ScrapSource>;
   sourceUrl?: Maybe<Scalars['String']>;
-  content: Array<ScrapContent>;
+  createdAt: Scalars['DateTime'];
+}
+
+export interface CreateScrapInput {
+  bucketId: Scalars['ID'];
+  title?: Maybe<Scalars['String']>;
+  content: Array<ScrapContentInput>;
+  source?: Maybe<ScrapSource>;
+  sourceUrl?: Maybe<Scalars['String']>;
   createdAt: Scalars['DateTime'];
 }
 
@@ -88,12 +105,6 @@ export interface PersistMediaJob  extends Node, Job {
   scrap?: Maybe<Scrap>;
 }
 
-export interface BucketPayload {
-   __typename: 'BucketPayload';
-  paths: Array<Scalars['String']>;
-  scraps?: Maybe<Array<Scrap>>;
-}
-
 export interface Query {
    __typename: 'Query';
   test?: Maybe<Scalars['String']>;
@@ -117,6 +128,7 @@ export interface Mutation {
    __typename: 'Mutation';
   createBucket?: Maybe<Bucket>;
   trashBucket?: Maybe<Scalars['Boolean']>;
+  createScrap?: Maybe<Scrap>;
 }
 
 
@@ -129,6 +141,11 @@ export interface MutationTrashBucketArgs {
   input: TrashBucketInput;
 }
 
+
+export interface MutationCreateScrapArgs {
+  input: CreateScrapInput;
+}
+
 export type BucketFieldsFragment = { __typename: 'Bucket', id: string };
 
 export type ScrapFieldsFragment = { __typename: 'Scrap', id: string, bucketId: string, title?: Maybe<string>, source?: Maybe<ScrapSource>, sourceUrl?: Maybe<string>, createdAt: DateTime, content: Array<{ __typename: 'ScrapContent', key: number | string, type: ScrapType, value: string, originalHTML?: Maybe<string>, xPath?: Maybe<string> }> };
@@ -139,6 +156,16 @@ export type LoadBucketsQueryVariables = {};
 export type LoadBucketsQuery = { __typename: 'Query', buckets: Array<(
     { __typename: 'Bucket' }
     & BucketFieldsFragment
+  )> };
+
+export type CreateScrapMutationVariables = {
+  input: CreateScrapInput;
+};
+
+
+export type CreateScrapMutation = { __typename: 'Mutation', createScrap?: Maybe<(
+    { __typename: 'Scrap' }
+    & ScrapFieldsFragment
   )> };
 
 export type CreateBucketMutationVariables = {

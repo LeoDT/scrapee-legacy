@@ -1,68 +1,86 @@
-import { observable, IObservableArray } from 'mobx';
-
-import { ScrapSource, Scrap } from 'core/client-types';
-
-import { sanitizeHTMLElement } from 'shared/utils/html';
-
-import { DOMClipperApi } from './api';
-import { xPathWithWindow } from '../utils/domPath';
-import { addTextContentToScrap } from '../../core/storage/utils';
+import { computed, decorate, observable } from 'mobx';
 import { DateTime } from 'luxon';
 
+import { sanitizeHTMLElement } from 'shared/utils/html';
+import { xPathWithWindow } from 'shared/utils/domPath';
+
+import { isRootBucket } from 'core/storage/utils';
+import { Client } from 'core/client/types';
+import { loadBucketQuery, createScrapMutation } from 'core/client/queries';
+import {
+  ScrapSource,
+  Bucket,
+  LoadBucketsQuery,
+  ScrapType,
+  CreateScrapMutation,
+  CreateScrapMutationVariables,
+} from 'core/client-types';
+
 export class Store {
-  api: DOMClipperApi;
+  client: Client;
 
-  buckets: IObservableArray<string>;
-  selectedBucket = '';
+  selectedBucket: Bucket | null;
 
-  constructor(api: DOMClipperApi) {
-    this.api = api;
-    this.buckets = observable.array([]);
+  constructor(client: Client) {
+    this.client = client;
+
+    this.selectedBucket = null;
   }
 
-  selectBucket(id: string): boolean {
-    this.selectedBucket = id;
-
-    return true;
+  get buckets(): Bucket[] {
+    return this.client.cache.readAll<Bucket>('Bucket');
   }
 
-  initApi(): Promise<{}> {
-    return this.api.init();
+  selectBucket(b: Bucket): void {
+    this.selectedBucket = b;
   }
 
-  async loadBuckets(): Promise<PlainObject> {
-    const res = await this.api.loadBuckets();
+  selectBucketWithId(id: string): void {
+    const b = this.buckets.find((b) => b.id === id);
 
-    if (res.buckets) {
-      this.buckets.replace(res.buckets);
-      this.selectedBucket = res.buckets[0];
+    if (b) {
+      this.selectBucket(b);
     }
-
-    return res;
   }
 
-  async saveScrap(els: HTMLElement[]): Promise<PlainObject> {
+  async loadBuckets(): Promise<void> {
+    await this.client.send<LoadBucketsQuery>({
+      query: loadBucketQuery,
+    });
+
+    const root = this.buckets.find((b) => isRootBucket(b.id));
+
+    if (root) {
+      this.selectBucket(root);
+    }
+  }
+
+  async saveScrap(els: HTMLElement[]): Promise<void> {
+    if (!this.selectedBucket) return;
+
     const xPath = xPathWithWindow(window.Node);
-    const scrap: Scrap = {
-      id: '',
+    const input = {
+      bucketId: this.selectedBucket.id,
       title: document.title,
       source: ScrapSource.Clipper,
       sourceUrl: location.href,
-      content: [],
-      createdAt: DateTime.local()
+      content: els.map((el) => ({
+        type: ScrapType.Text,
+        value: sanitizeHTMLElement(el, { absolutifyURLs: true }),
+        originalHTML: el.outerHTML,
+        xPath: xPath(el),
+      })),
+      createdAt: DateTime.local(),
     };
 
-    els.forEach(el => {
-      addTextContentToScrap(scrap, sanitizeHTMLElement(el, { absolutifyURLs: true }), {
-        originalHTML: el.outerHTML,
-        xPath: xPath(el)
-      });
+    await this.client.send<CreateScrapMutation, CreateScrapMutationVariables>({
+      query: createScrapMutation,
+      variables: { input },
     });
-
-    if (this.selectedBucket) {
-      return this.api.createScrap({ bucketId: this.selectedBucket, scrap });
-    }
-
-    return {};
   }
 }
+
+decorate(Store, {
+  selectedBucket: observable.ref,
+  buckets: computed,
+});

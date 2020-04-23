@@ -38,9 +38,13 @@ export class BaseStorage {
     return SCRAP_FILENAME_REGEXP.test(path);
   }
 
-  walk(p: string, walker: (item: klaw.Item) => void): Promise<void> {
+  walk(
+    p: string,
+    walker: (item: klaw.Item) => void,
+    options?: { depthLimit?: number }
+  ): Promise<void> {
     return new Promise((resolve) => {
-      klaw(this.resolve(p))
+      klaw(this.resolve(p), options)
         .on('data', walker)
         .on('end', () => resolve());
     });
@@ -65,9 +69,13 @@ export class BaseStorage {
     const fullPath = this.resolve(p);
     const paths: string[] = [];
 
-    await this.walk(fullPath, (item) => {
-      if (item.path !== fullPath) paths.push(this.unresolve(item.path));
-    });
+    await this.walk(
+      fullPath,
+      (item) => {
+        if (item.path !== fullPath) paths.push(this.unresolve(item.path));
+      },
+      { depthLimit: 0 }
+    );
 
     const scraps: BaseScrap[] = [];
 

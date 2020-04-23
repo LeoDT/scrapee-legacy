@@ -52,13 +52,30 @@ export interface ScrapContent {
   xPath?: Maybe<Scalars['String']>;
 }
 
+export interface ScrapContentInput {
+  key?: Maybe<Scalars['IntString']>;
+  type: ScrapType;
+  value: Scalars['String'];
+  originalHTML?: Maybe<Scalars['String']>;
+  xPath?: Maybe<Scalars['String']>;
+}
+
 export interface Scrap  extends Node {
   id: Scalars['ID'];
   bucketId: Scalars['ID'];
   title?: Maybe<Scalars['String']>;
+  content: Array<ScrapContent>;
   source?: Maybe<ScrapSource>;
   sourceUrl?: Maybe<Scalars['String']>;
-  content: Array<ScrapContent>;
+  createdAt: Scalars['DateTime'];
+}
+
+export interface CreateScrapInput {
+  bucketId: Scalars['ID'];
+  title?: Maybe<Scalars['String']>;
+  content: Array<ScrapContentInput>;
+  source?: Maybe<ScrapSource>;
+  sourceUrl?: Maybe<Scalars['String']>;
   createdAt: Scalars['DateTime'];
 }
 
@@ -87,11 +104,6 @@ export interface PersistMediaJob  extends Node, Job {
   scrap?: Maybe<Scrap>;
 }
 
-export interface BucketPayload {
-  paths: Array<Scalars['String']>;
-  scraps?: Maybe<Array<Scrap>>;
-}
-
 export interface Query {
   test?: Maybe<Scalars['String']>;
   buckets: Array<Bucket>;
@@ -113,6 +125,7 @@ export interface QueryScrapsArgs {
 export interface Mutation {
   createBucket?: Maybe<Bucket>;
   trashBucket?: Maybe<Scalars['Boolean']>;
+  createScrap?: Maybe<Scrap>;
 }
 
 
@@ -123,6 +136,11 @@ export interface MutationCreateBucketArgs {
 
 export interface MutationTrashBucketArgs {
   input: TrashBucketInput;
+}
+
+
+export interface MutationCreateScrapArgs {
+  input: CreateScrapInput;
 }
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -211,12 +229,13 @@ export type ResolversTypes = ResolversObject<{
   ScrapSource: ScrapSource,
   ScrapType: ScrapType,
   ScrapContent: ResolverTypeWrapper<ScrapContent>,
+  ScrapContentInput: ScrapContentInput,
   Scrap: ResolverTypeWrapper<Scrap>,
+  CreateScrapInput: CreateScrapInput,
   JobStatus: JobStatus,
   Job: ResolversTypes['PersistMediaJob'],
   Int: ResolverTypeWrapper<Scalars['Int']>,
   PersistMediaJob: ResolverTypeWrapper<PersistMediaJob>,
-  BucketPayload: ResolverTypeWrapper<BucketPayload>,
   Query: ResolverTypeWrapper<{}>,
   Mutation: ResolverTypeWrapper<{}>,
 }>;
@@ -235,12 +254,13 @@ export type ResolversParentTypes = ResolversObject<{
   ScrapSource: ScrapSource,
   ScrapType: ScrapType,
   ScrapContent: ScrapContent,
+  ScrapContentInput: ScrapContentInput,
   Scrap: Scrap,
+  CreateScrapInput: CreateScrapInput,
   JobStatus: JobStatus,
   Job: ResolversParentTypes['PersistMediaJob'],
   Int: Scalars['Int'],
   PersistMediaJob: PersistMediaJob,
-  BucketPayload: BucketPayload,
   Query: {},
   Mutation: {},
 }>;
@@ -276,9 +296,9 @@ export type ScrapResolvers<ContextType = GraphQLServerContext, ParentType extend
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   bucketId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>,
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
+  content?: Resolver<Array<ResolversTypes['ScrapContent']>, ParentType, ContextType>,
   source?: Resolver<Maybe<ResolversTypes['ScrapSource']>, ParentType, ContextType>,
   sourceUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
-  content?: Resolver<Array<ResolversTypes['ScrapContent']>, ParentType, ContextType>,
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>,
   __isTypeOf?: isTypeOfResolverFn<ParentType>,
 }>;
@@ -302,12 +322,6 @@ export type PersistMediaJobResolvers<ContextType = GraphQLServerContext, ParentT
   __isTypeOf?: isTypeOfResolverFn<ParentType>,
 }>;
 
-export type BucketPayloadResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['BucketPayload'] = ResolversParentTypes['BucketPayload']> = ResolversObject<{
-  paths?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>,
-  scraps?: Resolver<Maybe<Array<ResolversTypes['Scrap']>>, ParentType, ContextType>,
-  __isTypeOf?: isTypeOfResolverFn<ParentType>,
-}>;
-
 export type QueryResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   test?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>,
   buckets?: Resolver<Array<ResolversTypes['Bucket']>, ParentType, ContextType>,
@@ -319,6 +333,7 @@ export type QueryResolvers<ContextType = GraphQLServerContext, ParentType extend
 export type MutationResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createBucket?: Resolver<Maybe<ResolversTypes['Bucket']>, ParentType, ContextType, RequireFields<MutationCreateBucketArgs, 'input'>>,
   trashBucket?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationTrashBucketArgs, 'input'>>,
+  createScrap?: Resolver<Maybe<ResolversTypes['Scrap']>, ParentType, ContextType, RequireFields<MutationCreateScrapArgs, 'input'>>,
 }>;
 
 export type Resolvers<ContextType = GraphQLServerContext> = ResolversObject<{
@@ -330,7 +345,6 @@ export type Resolvers<ContextType = GraphQLServerContext> = ResolversObject<{
   Scrap?: ScrapResolvers<ContextType>,
   Job?: JobResolvers,
   PersistMediaJob?: PersistMediaJobResolvers<ContextType>,
-  BucketPayload?: BucketPayloadResolvers<ContextType>,
   Query?: QueryResolvers<ContextType>,
   Mutation?: MutationResolvers<ContextType>,
 }>;

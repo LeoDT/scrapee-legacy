@@ -1,5 +1,5 @@
 import uuid from 'shared/utils/uuid';
-import { Request, Resource, Response } from 'shared/utils/localMessage';
+import { Request, Response } from 'shared/utils/localMessage';
 
 let port: chrome.runtime.Port | null;
 const sentRequests = new Map<
@@ -29,7 +29,7 @@ function handleMessage(msg: Response): void {
 function initPort(): chrome.runtime.Port {
   port = chrome.runtime.connectNative('com.leodt.scrapee');
   port.onMessage.addListener(handleMessage);
-  port.onDisconnect.addListener(function() {
+  port.onDisconnect.addListener(function () {
     console.log('Disconnected');
     port = null;
   });
@@ -37,17 +37,13 @@ function initPort(): chrome.runtime.Port {
   return port;
 }
 
-export async function nativeRequest(
-  resource: Resource,
-  body: PlainObject = {}
-): Promise<PlainObject> {
+export async function nativeRequest(body: PlainObject = {}): Promise<PlainObject> {
   if (!port) port = initPort();
 
   const request: Request = {
-    type: 'request',
+    type: 'graphql',
     requestId: uuid.uuid(),
-    resource,
-    body
+    body,
   };
 
   port.postMessage(request);
@@ -56,7 +52,7 @@ export async function nativeRequest(
     sentRequests.set(request.requestId, {
       request,
       resolve,
-      reject
+      reject,
     });
   });
 }

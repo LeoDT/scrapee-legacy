@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { uniqueId, each } from 'lodash';
+import { uniqueId } from 'lodash';
 import { ipcRenderer, IpcRendererEvent } from 'electron';
-import { buildClientSchema, GraphQLObjectType } from 'graphql';
+import { buildClientSchema } from 'graphql';
 
 import { createContextNoNullCheck } from 'shared/utils/react';
-import { getActualType, isTypeImplementNode, parseValue } from 'shared/utils/graphql';
 
-import { SerializableGraphQLRequest } from '../types';
-import introspection from '../introspection.json';
-import { Client, ClientResult, ClientFailResult } from './types';
-import { Cache } from './cache';
+import { SerializableGraphQLRequest } from 'core/types';
+import introspection from 'core/introspection.json';
+import { Client, ClientResult, ClientFailResult } from 'core/client/types';
+import { Cache, writeCacheWithGraphQLSchema } from 'core/client/cache';
 
 export function createClient(): Client {
   const schema = buildClientSchema(introspection as any);
@@ -33,24 +32,6 @@ export function createClient(): Client {
     });
   }
 
-  function writeCache(data: Record<string, any>): void {
-    each(data, (v, k) => {
-      let field = schema.getQueryType()?.getFields()?.[k];
-
-      if (!field) field = schema.getMutationType()?.getFields()?.[k];
-
-      if (field) {
-        const type = getActualType(field.type);
-
-        if (type instanceof GraphQLObjectType && isTypeImplementNode(type)) {
-          const value = Array.isArray(v) ? v : [v];
-
-          cache.set(value.map((v) => parseValue(v, type)));
-        }
-      }
-    });
-  }
-
   function responseListener(
     _event: IpcRendererEvent,
     id: string,
@@ -63,7 +44,7 @@ export function createClient(): Client {
       const { resolve, reject } = listener;
 
       if (type === 'data') {
-        writeCache(dataOrError);
+        writeCacheWithGraphQLSchema(cache, dataOrError, schema);
 
         resolve({ success: true, data: dataOrError });
       }

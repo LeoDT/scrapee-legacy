@@ -1,10 +1,28 @@
-import { createStorage } from 'core/storage';
-import { GraphQLServerContext } from '../../core/server/types';
+import { ExecutionResult, GraphQLSchema } from 'graphql';
 
-export async function initServices(): Promise<GraphQLServerContext> {
+import { createStorage, BaseStorage } from 'core/storage';
+import { loadSchema, graphqlExecutor } from 'core/server/schema';
+
+import { SerializableGraphQLRequest } from 'core/types';
+
+export interface Services {
+  bucketStorage: BaseStorage;
+  graphql: {
+    schema: GraphQLSchema;
+    execute: (r: SerializableGraphQLRequest) => Promise<ExecutionResult>;
+  };
+}
+
+export async function initServices(): Promise<Services> {
   const bucketStorage = await createStorage()();
+  const graphQLSchema = await loadSchema();
 
   return {
-    bucketStorage
+    bucketStorage,
+    graphql: {
+      schema: graphQLSchema,
+      execute: (request: SerializableGraphQLRequest) =>
+        graphqlExecutor(graphQLSchema, { bucketStorage }, request),
+    },
   };
 }

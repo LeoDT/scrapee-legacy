@@ -63,6 +63,7 @@ interface StickySentinelProps extends React.HTMLProps<HTMLDivElement> {
 export function Sticky({
   children,
   className,
+  disabled = false,
   onStickyChange,
   ...restProps
 }: StickySentinelProps): JSX.Element {
@@ -89,7 +90,10 @@ export function Sticky({
   }, [stickyChange]);
 
   return (
-    <div className={cx('sticky top-0', { shadow: isSticky }, className)} {...restProps}>
+    <div
+      className={cx('sticky top-0', { shadow: !disabled && isSticky }, className)}
+      {...restProps}
+    >
       <div className="absolute left-0" ref={ref} style={{ top: -1 }} />
       {children}
     </div>

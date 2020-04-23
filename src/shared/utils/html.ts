@@ -85,7 +85,7 @@ const VALID_TAGS = new Set([
   'var',
   'video',
   'wbr',
-  'svg'
+  'svg',
 ]);
 
 const VALID_ATTRS = ['title', 'id'];
@@ -98,7 +98,7 @@ const VALID_ATTRS_BY_TAG: Record<string, string[] | string> = {
   time: ['datetime'],
   progress: ['max', 'value'],
   source: '*',
-  track: '*'
+  track: '*',
 };
 
 interface SanitizeHTMLOptions {
@@ -121,7 +121,7 @@ function shouldBeRejected(el: Element): boolean {
 
 function createTreeWalker(root: Element): TreeWalker {
   return document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
-    acceptNode: node => {
+    acceptNode: (node) => {
       if (node.nodeType === Node.ELEMENT_NODE) {
         return shouldBeRejected(node as Element)
           ? NodeFilter.FILTER_REJECT
@@ -129,7 +129,7 @@ function createTreeWalker(root: Element): TreeWalker {
       }
 
       return NodeFilter.FILTER_ACCEPT;
-    }
+    },
   });
 }
 
@@ -232,8 +232,8 @@ export function sanitizeHTMLElement(root: Element, options?: SanitizeHTMLOptions
   }
 
   if (process.env.NODE_ENV === 'development') {
-    console.log(`sanitize ${nodeCounter} html element`);
     console.timeEnd('sanitize html element');
+    console.log(`sanitize ${nodeCounter} html element`);
   }
 
   return dstRoot.outerHTML;

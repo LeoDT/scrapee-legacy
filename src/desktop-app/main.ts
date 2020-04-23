@@ -4,8 +4,8 @@ import * as net from 'net';
 
 import { createLocalMessageServer } from './localMessageServer';
 import { setApplicationMenu } from './appMenu';
-import { createServer as createGraphqlServer } from '../core/server';
 import { initServices } from './services';
+import { createServer as createIPCServer } from './ipcServer';
 
 if (process.env.NODE_ENV === 'development') {
   require('electron-debug')();
@@ -24,7 +24,7 @@ async function installExtensions(): Promise<unknown> {
   const extensions = ['REACT_DEVELOPER_TOOLS', 'REDUX_DEVTOOLS'];
 
   return Promise.all(
-    extensions.map(name => installer.default(installer[name], forceDownload))
+    extensions.map((name) => installer.default(installer[name], forceDownload))
   ).catch(console.log);
 }
 
@@ -38,7 +38,7 @@ app.on('ready', async () => {
 
   const externalDisplay = screen
     .getAllDisplays()
-    .find(display => display.bounds.x !== 0 || display.bounds.y !== 0);
+    .find((display) => display.bounds.x !== 0 || display.bounds.y !== 0);
 
   const mainWindow = new BrowserWindow({
     show: false,
@@ -48,8 +48,8 @@ app.on('ready', async () => {
     y: externalDisplay ? externalDisplay.bounds.y + 50 : undefined,
     titleBarStyle: 'hidden',
     webPreferences: {
-      nodeIntegration: true
-    }
+      nodeIntegration: true,
+    },
   });
 
   setApplicationMenu(mainWindow);
@@ -75,7 +75,7 @@ app.on('ready', async () => {
   mainWindow.webContents.on('will-navigate', openLink);
   mainWindow.webContents.on('new-window', openLink);
 
-  mainWindow.on('close', e => {
+  mainWindow.on('close', (e) => {
     e.preventDefault();
 
     mainWindow.hide();
@@ -99,15 +99,15 @@ app.on('ready', async () => {
 
   const services = await initServices();
   const localMessageServer = createLocalMessageServer(services);
-  const disposeGraphqlServer = await createGraphqlServer(services);
+  const disposeIPCServer = await createIPCServer(services);
 
   cache.tray = tray;
   cache.mainWindow = mainWindow;
-  cache.disposeGraphqlServer = disposeGraphqlServer;
+  cache.disposeGraphqlServer = disposeIPCServer;
   cache.localMessageServer = localMessageServer;
 
   app.on('quit', () => {
-    disposeGraphqlServer();
+    disposeIPCServer();
     cache.localMessageServer?.close();
 
     cache = {};

@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { each } from 'lodash';
 import { ObservableMap, observable, action, decorate } from 'mobx';
+import { GraphQLSchema, GraphQLObjectType } from 'graphql';
 
+import { getActualType, isTypeImplementNode, parseValue } from 'shared/utils/graphql';
 import { createContextNoNullCheck } from 'shared/utils/react';
 
 export type CacheEntityID = string | number;
@@ -104,3 +107,25 @@ decorate(Cache, {
 });
 
 export const [useCache, CacheContext] = createContextNoNullCheck<Cache>();
+
+export function writeCacheWithGraphQLSchema(
+  cache: Cache,
+  data: Record<string, any>,
+  schema: GraphQLSchema
+): void {
+  each(data, (v, k) => {
+    let field = schema.getQueryType()?.getFields()?.[k];
+
+    if (!field) field = schema.getMutationType()?.getFields()?.[k];
+
+    if (field) {
+      const type = getActualType(field.type);
+
+      if (type instanceof GraphQLObjectType && isTypeImplementNode(type)) {
+        const value = Array.isArray(v) ? v : [v];
+
+        cache.set(value.map((v) => parseValue(v, type)));
+      }
+    }
+  });
+}

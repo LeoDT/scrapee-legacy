@@ -25,14 +25,17 @@ export default function Detail(): JSX.Element {
   }, [setStickyObserver]);
 
   React.useEffect(() => {
+    const id = bucketId ? decodeURIComponent(bucketId) : '';
+
     const dispose = reaction(
-      () => libraryStore.buckets.find((b) => b.id === (bucketId || '')),
+      () => libraryStore.buckets.find((b) => b.id === id),
       (bucket) => {
         if (bucket) {
           libraryStore.selectBucket(bucket);
           libraryStore.loadScraps(bucket);
         }
-      }
+      },
+      { fireImmediately: true }
     );
 
     return () => {

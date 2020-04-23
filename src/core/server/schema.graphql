@@ -36,16 +36,36 @@ type ScrapContent {
   xPath: String
 }
 
+input ScrapContentInput {
+  key: IntString
+  type: ScrapType!
+  value: String!
+
+  originalHTML: String
+  xPath: String
+}
+
 type Scrap implements Node {
   id: ID!
   bucketId: ID!
 
   title: String
+  content: [ScrapContent!]!
 
   source: ScrapSource
   sourceUrl: String
 
-  content: [ScrapContent!]!
+  createdAt: DateTime!
+}
+
+input CreateScrapInput {
+  bucketId: ID!
+
+  title: String
+  content: [ScrapContentInput!]!
+
+  source: ScrapSource
+  sourceUrl: String
 
   createdAt: DateTime!
 }
@@ -75,11 +95,6 @@ type PersistMediaJob implements Node & Job {
   scrap: Scrap
 }
 
-type BucketPayload {
-  paths: [String!]!
-  scraps: [Scrap!]
-}
-
 type Query {
   test: String
   buckets: [Bucket!]!
@@ -91,6 +106,8 @@ type Query {
 type Mutation {
   createBucket(input: CreateBucketInput!): Bucket
   trashBucket(input: TrashBucketInput!): Boolean
+
+  createScrap(input: CreateScrapInput!): Scrap
 }
 
 schema {

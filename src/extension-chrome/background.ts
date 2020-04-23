@@ -5,7 +5,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: 'sendToScrapee',
     title: 'Send to Scrapee',
-    contexts: ['selection']
+    contexts: ['selection'],
   });
 });
 
@@ -13,7 +13,7 @@ let port: chrome.runtime.Port | null;
 
 function initPort(): void {
   port = chrome.runtime.connectNative('com.leodt.scrapee');
-  port.onMessage.addListener(function(msg) {
+  port.onMessage.addListener(function (msg) {
     console.log('Received', msg);
   });
   port.onDisconnect.addListener(() => {
@@ -24,11 +24,11 @@ function initPort(): void {
 
 chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
   if (msg.type === 'nativeRequest') {
-    nativeRequest(msg.resource, msg.body).then(
-      response => {
+    nativeRequest(msg.body).then(
+      (response) => {
         sendResponse(response);
       },
-      e => {
+      (e) => {
         sendResponse({ error: true, errorName: e.name, errorMessage: e.message });
       }
     );
@@ -39,7 +39,7 @@ chrome.runtime.onMessage.addListener((msg, _, sendResponse) => {
   return false;
 });
 
-chrome.contextMenus.onClicked.addListener(obj => {
+chrome.contextMenus.onClicked.addListener((obj) => {
   if (obj.menuItemId === 'sendToScrapee') {
     if (!port) initPort();
 
@@ -48,13 +48,13 @@ chrome.contextMenus.onClicked.addListener(obj => {
         id: 'sendToScrapee',
         title: 'Send to Scrapee',
         contexts: ['selection'],
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
   }
 });
 
-chrome.browserAction.onClicked.addListener(tab => {
+chrome.browserAction.onClicked.addListener((tab) => {
   if (tab && tab.id) {
     chrome.tabs.sendMessage(tab.id, { name: 'toggle-clipper' });
   }

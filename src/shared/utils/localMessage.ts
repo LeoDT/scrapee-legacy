@@ -1,9 +1,6 @@
-export type Resource = 'init' | 'buckets' | 'createScrap';
-
 export interface Request {
-  type: 'request';
+  type: 'graphql';
   requestId: string;
-  resource: Resource;
   body: PlainObject;
 }
 
@@ -21,13 +18,13 @@ export interface Response {
 export function success(res: PlainObject = {}): ResponseBody {
   return {
     success: true,
-    ...res
+    ...res,
   };
 }
 
 export function fail(res: PlainObject = {}): ResponseBody {
   return {
     success: false,
-    ...res
+    ...res,
   };
 }

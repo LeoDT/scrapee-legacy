@@ -16,7 +16,7 @@ export default function MainPanel(): JSX.Element {
   const [inspectorEnabled, setInspectorEnabled] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const onSelect = React.useCallback((el: HTMLElement): void => {
-    setSelectedEls(els => [...els, el]);
+    setSelectedEls((els) => [...els, el]);
   }, []);
 
   React.useEffect(() => {
@@ -53,11 +53,9 @@ export default function MainPanel(): JSX.Element {
               setSaving(true);
 
               try {
-                const res = await store.saveScrap(selectedEls);
+                await store.saveScrap(selectedEls);
 
-                if (res.success) {
-                  setSelectedEls([]);
-                }
+                setSelectedEls([]);
               } finally {
                 setSaving(false);
               }

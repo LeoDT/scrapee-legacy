@@ -1,11 +1,12 @@
 import { basename } from 'path';
-import { decorate, computed, action } from 'mobx';
+import { decorate, computed, action, observable } from 'mobx';
 
 import { createContextNoNullCheck } from 'shared/utils/react';
 import { treeFromPaths, TreeNode } from 'shared/utils/tree';
 
+import { isRootBucket } from 'core/storage/utils';
 import { Client } from 'core/client/types';
-import { bucketFields, scrapFields } from 'core/client/fragments';
+import { bucketFields, scrapFields, loadBucketQuery } from 'core/client/queries';
 import { StatesForCacheEntities } from 'core/client/cacheEntity';
 import {
   Bucket,
@@ -38,7 +39,7 @@ export class LibraryStore {
     this.bucketStates = new StatesForCacheEntities<Bucket, BucketState>((b) => ({
       expanded: false,
       get isRoot() {
-        return b.id === '';
+        return isRootBucket(b.id);
       },
       get name() {
         return basename(b.id);
@@ -52,15 +53,7 @@ export class LibraryStore {
 
   async loadBuckets(): Promise<void> {
     await this.client.send<LoadBucketsQuery>({
-      query: /* GraphQL */ `
-        ${bucketFields}
-
-        query LoadBucketsQuery {
-          buckets {
-            ...bucketFields
-          }
-        }
-      `,
+      query: loadBucketQuery,
     });
   }
 
@@ -151,6 +144,7 @@ export class LibraryStore {
 }
 
 decorate(LibraryStore, {
+  selectedBucketId: observable,
   buckets: computed,
   bucketTree: computed,
   toggleBucket: action,
