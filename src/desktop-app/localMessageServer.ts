@@ -23,18 +23,9 @@ export function createLocalMessageServer(services: Services): net.Server {
         if (request.type === 'graphql') {
           const result = await services.graphql.execute(request.body);
 
-          if (result.data) {
-            const res = JSON.stringify({
-              type: 'response',
-              requestId: request.requestId,
-              body: { data: result.data },
-            });
-            socket.write(res);
-
-            console.log(`on send: ${res}`);
-          }
-
           if (result.errors) {
+            console.error(result.errors);
+
             socket.write(
               JSON.stringify({
                 type: 'response',
@@ -44,6 +35,15 @@ export function createLocalMessageServer(services: Services): net.Server {
                 },
               })
             );
+          } else {
+            const res = JSON.stringify({
+              type: 'response',
+              requestId: request.requestId,
+              body: { data: result.data },
+            });
+            socket.write(res);
+
+            console.log(`on send: ${res}`);
           }
         }
       } catch (e) {

@@ -1,16 +1,18 @@
-import { last } from 'lodash';
+import { last, cloneDeep } from 'lodash';
 import { JSDOM } from 'jsdom';
-import http from 'http';
-import path from 'path';
+import { http, https } from 'follow-redirects';
+import { IncomingMessage } from 'http';
+import * as path from 'path';
 import fs from 'fs';
 
-import { Scrap } from 'shared/models/Scrap';
 import { xPathWithWindow } from 'shared/utils/domPath';
 import uuid from 'shared/utils/uuid';
 
-import { db } from '../../../core/storage/main';
+import { Scrap, Job } from 'core/server-types';
 
-import { Job } from './base';
+import { JobContext } from '../types';
+
+type BaseScrap = Omit<Scrap, 'bucketId'>;
 
 interface Media {
   key: string | number;
@@ -19,15 +21,15 @@ interface Media {
   filename: string;
 }
 
-function extractMedia(scrap: Scrap): Media[] {
+function extractMedia(scrap: BaseScrap): Media[] {
   const medias: Media[] = [];
 
-  scrap.content.forEach(content => {
+  scrap.content.forEach((content) => {
     const { window } = new JSDOM(content.value);
     const { document } = window;
     const xPath = xPathWithWindow(window.Node);
 
-    document.querySelectorAll('img').forEach(img => {
+    document.querySelectorAll('img').forEach((img) => {
       const src = img.getAttribute('src');
 
       if (src?.startsWith('http')) {
@@ -35,7 +37,7 @@ function extractMedia(scrap: Scrap): Media[] {
           key: content.key,
           xPath: xPath(img),
           oldUrl: src,
-          filename: ''
+          filename: '',
         });
       }
     });
@@ -44,15 +46,15 @@ function extractMedia(scrap: Scrap): Media[] {
   return medias;
 }
 
-function replaceMedias(scrap: Scrap, medias: Media[]): Scrap {
-  const newScrap = Scrap.clone(scrap);
+function replaceMedias(scrap: BaseScrap, medias: Media[]): BaseScrap {
+  const newScrap = cloneDeep(scrap);
 
   medias.forEach(({ key, xPath, oldUrl, filename }) => {
-    const content = newScrap.content.find(c => c.key === key);
+    const content = newScrap.content.find((c) => c.key === key);
 
     if (content) {
       const { document } = new JSDOM(content.value).window;
-      const xResult = document.evaluate(xPath, document);
+      const xResult = document.evaluate(xPath, document, null, 5);
       const node = xResult.iterateNext();
 
       if (node) {
@@ -69,7 +71,7 @@ function replaceMedias(scrap: Scrap, medias: Media[]): Scrap {
   return newScrap;
 }
 
-function guessFileExtFromResponse(response: http.IncomingMessage): string {
+function guessFileExtFromResponse(response: IncomingMessage): string {
   const contentType = response.headers['content-type'];
 
   if (contentType) {
@@ -83,30 +85,34 @@ function guessFileExtFromResponse(response: http.IncomingMessage): string {
   return '';
 }
 
-export class PersistMediaJob extends Job {
+export class PersistMediaJobProcessor {
   bucketId: string;
   scrapId: string;
 
-  scrap?: Scrap;
   medias: Media[];
 
-  constructor(bucketId: string, scrapId: string) {
-    super('persistMedia');
+  constructor(job: Job) {
+    const { data } = job;
 
-    this.bucketId = bucketId;
-    this.scrapId = scrapId;
+    if (data?.__typename !== 'PersistMediaJobData') {
+      throw TypeError(`need PersistMediaJobData but got ${data?.__typename}`);
+    }
+
+    this.scrapId = data.scrapId;
+    this.bucketId = path.dirname(data.scrapId);
     this.medias = [];
   }
 
-  async download(media: Media): Promise<Media> {
+  async download(media: Media, pathRoot: string): Promise<Media> {
     return new Promise((resolve, reject) => {
-      console.log('downloading');
-      http.get(media.oldUrl, response => {
+      const client = media.oldUrl.startsWith('https:') ? https : http;
+
+      client.get(media.oldUrl, (response) => {
         if (response.statusCode === 200) {
           const fileId = uuid.generate();
           const fileExt = guessFileExtFromResponse(response);
           const filename = `${fileId}${fileExt ? `.${fileExt}` : ''}`;
-          const filePath = path.resolve(this.bucketId, filename);
+          const filePath = path.resolve(pathRoot, this.bucketId, filename);
 
           response.pipe(fs.createWriteStream(filePath));
 
@@ -120,29 +126,27 @@ export class PersistMediaJob extends Job {
     });
   }
 
-  async start(): Promise<void> {
-    super.start();
+  async execute(context: JobContext): Promise<void> {
+    const { bucketStorage } = context;
 
-    const bucket = await db.loadBucket(this.bucketId);
-
-    const scrap = await db.loadScrap(this.bucketId, bucket);
+    const scrap = await bucketStorage.readScrapWithId(this.scrapId);
 
     if (scrap) {
       this.medias = extractMedia(scrap);
     } else {
-      this.fail('scrap not exists');
-
-      return;
+      throw Error('Scrap not exist');
     }
 
-    const all = await Promise.allSettled(this.medias.map(m => this.download(m)));
+    const all = await Promise.allSettled(
+      this.medias.map((m) => this.download(m, bucketStorage.root))
+    );
 
     const medias = all
       .filter((result): result is PromiseFulfilledResult<Media> => result.status === 'fulfilled')
-      .map(result => result.value);
+      .map((result) => result.value);
 
     const newScrap = replaceMedias(scrap, medias);
 
-    await db.updateScrap(scrap, newScrap);
+    await bucketStorage.updateScrap(scrap.id, newScrap);
   }
 }

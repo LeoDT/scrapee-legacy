@@ -49,6 +49,7 @@ app.on('ready', async () => {
     titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: true,
+      webSecurity: process.env.NODE_ENV !== 'development',
     },
   });
 

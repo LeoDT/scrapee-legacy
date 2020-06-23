@@ -1,0 +1,1 @@
+export { PersistMediaJobProcessor } from './persistMedia';

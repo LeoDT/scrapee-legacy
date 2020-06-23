@@ -12,8 +12,8 @@ generates:
         DateTime: DateTime
       preResolveTypes: true
       contextType: GraphQLServerContext
-      nonOptionalTypename: true
-      skipTypename: true
+      nonOptionalTypename: false
+      skipTypename: false
       maybeValue: T | undefined | null
     plugins:
       - add:

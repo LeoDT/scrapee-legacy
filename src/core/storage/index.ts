@@ -109,6 +109,10 @@ export class BaseStorage {
     });
   }
 
+  async readScrapWithId(id: string): Promise<BaseScrap> {
+    return this.readScrap(this.resolve(id));
+  }
+
   async createBucket(name: string, parent: string): Promise<string> {
     const id = path.join(parent, name);
     const fullPath = this.resolve(id);

@@ -2,10 +2,11 @@ import * as React from 'react';
 import { cx } from 'emotion';
 import { Observer } from 'mobx-react-lite';
 
-import PreviewHTML from 'shared/components/PreviewHTML';
 import { Sticky } from 'shared/components/Sticky';
 
 import { Scrap } from 'core/client-types';
+
+import PreviewScrappedHTML from '../common/PreviewScrappedHTML';
 
 import { useLibraryStore } from './store';
 
@@ -41,7 +42,10 @@ export default function ScrapDetail({ scrap }: Props): JSX.Element {
               <div className="px-4 py-2">
                 {scrap.content ? (
                   <div className="select-text">
-                    <PreviewHTML html={scrap.content.map((c) => c.value).join('\n')} />
+                    <PreviewScrappedHTML
+                      html={scrap.content.map((c) => c.value).join('\n')}
+                      bucketId={scrap.bucketId}
+                    />
                   </div>
                 ) : null}
               </div>

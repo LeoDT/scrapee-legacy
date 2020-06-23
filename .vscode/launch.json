@@ -6,12 +6,9 @@
   "configurations": [
     {
       "type": "node",
-      "request": "launch",
-      "name": "Launch Program",
-      "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/scripts/graphqlPlayground.js",
-      "outFiles": ["${workspaceFolder}/**/*.js"],
-      "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v12.13.1/bin/node"
+      "request": "attach",
+      "name": "main",
+      "port": 5858
     }
   ]
 }

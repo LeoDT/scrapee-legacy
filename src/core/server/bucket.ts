@@ -4,7 +4,7 @@ export const resolvers: Resolvers = {
   Query: {
     async buckets(_1, _2, { bucketStorage }) {
       return (await bucketStorage.showAllBuckets()).map((id) => ({
-        __typename: 'Bucket',
+        __typename: 'Bucket' as const,
         id,
       }));
     },
@@ -16,7 +16,7 @@ export const resolvers: Resolvers = {
       const newId = await bucketStorage.createBucket(id, parentId);
 
       return {
-        __typename: 'Bucket',
+        __typename: 'Bucket' as const,
         id: newId,
       };
     },

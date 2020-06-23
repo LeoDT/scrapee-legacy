@@ -49,6 +49,8 @@ export class LibraryStore {
     this.scrapStates = new StatesForCacheEntities<Scrap, ScrapState>(() => ({
       expanded: false,
     }));
+
+    this.client.send({ query: `query { appConfig { rootPath }}` }).then((c) => console.log(c));
   }
 
   async loadBuckets(): Promise<void> {

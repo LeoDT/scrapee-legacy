@@ -1,4 +1,4 @@
-import { Resolvers, Scrap } from '../server-types';
+import { Resolvers, Scrap, JobType } from '../server-types';
 
 export const resolvers: Resolvers = {
   Query: {
@@ -9,7 +9,7 @@ export const resolvers: Resolvers = {
     },
   },
   Mutation: {
-    async createScrap(_, { input }, { bucketStorage }) {
+    async createScrap(_, { input }, { bucketStorage, jobManager }) {
       const { bucketId, title, source, sourceUrl, createdAt, content } = input;
 
       const scrapJSON: Partial<Scrap> = {
@@ -22,8 +22,13 @@ export const resolvers: Resolvers = {
 
       const scrap = await bucketStorage.createScrapFromJSON(scrapJSON, bucketId);
 
+      jobManager.createAndStartJob(JobType.PersistMedia, {
+        __typename: 'PersistMediaJobData',
+        scrapId: scrap.id,
+      });
+
       return {
-        __typename: 'Scrap',
+        __typename: 'Scrap' as const,
         ...scrap,
         bucketId,
       };

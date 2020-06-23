@@ -1,6 +1,10 @@
 scalar IntString
 scalar DateTime
 
+type AppConfig {
+  rootPath: String!
+}
+
 interface Node {
   id: ID!
 }
@@ -72,30 +76,37 @@ input CreateScrapInput {
 
 enum JobStatus {
   created
-  queued
   started
   failed
   finished
 }
 
-interface Job {
-  type: String!
-  priority: Int!
-  status: JobStatus!
-  failReason: String
+enum JobType {
+  persistMedia
 }
 
-type PersistMediaJob implements Node & Job {
+type FakeJobData {
+  fake: String!
+}
+
+type PersistMediaJobData {
+  scrapId: ID!
+}
+
+union JobData = PersistMediaJobData | FakeJobData
+
+type Job implements Node {
   id: ID!
-  type: String!
+  type: JobType!
   priority: Int!
   status: JobStatus!
   failReason: String
-  bucket: Bucket
-  scrap: Scrap
+  interval: Int
+  data: JobData
 }
 
 type Query {
+  appConfig: AppConfig!
   test: String
   buckets: [Bucket!]!
   bucket(id: String!): Bucket

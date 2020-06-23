@@ -15,6 +15,11 @@ export interface Scalars {
 
 
 
+export interface AppConfig {
+   __typename: 'AppConfig';
+  rootPath: Scalars['String'];
+}
+
 export interface Node {
   id: Scalars['ID'];
 }
@@ -81,32 +86,41 @@ export interface CreateScrapInput {
 
 export enum JobStatus {
   Created = 'created',
-  Queued = 'queued',
   Started = 'started',
   Failed = 'failed',
   Finished = 'finished'
 }
 
-export interface Job {
-  type: Scalars['String'];
-  priority: Scalars['Int'];
-  status: JobStatus;
-  failReason?: Maybe<Scalars['String']>;
+export enum JobType {
+  PersistMedia = 'persistMedia'
 }
 
-export interface PersistMediaJob  extends Node, Job {
-   __typename: 'PersistMediaJob';
+export interface FakeJobData {
+   __typename: 'FakeJobData';
+  fake: Scalars['String'];
+}
+
+export interface PersistMediaJobData {
+   __typename: 'PersistMediaJobData';
+  scrapId: Scalars['ID'];
+}
+
+export type JobData = PersistMediaJobData | FakeJobData;
+
+export interface Job  extends Node {
+   __typename: 'Job';
   id: Scalars['ID'];
-  type: Scalars['String'];
+  type: JobType;
   priority: Scalars['Int'];
   status: JobStatus;
   failReason?: Maybe<Scalars['String']>;
-  bucket?: Maybe<Bucket>;
-  scrap?: Maybe<Scrap>;
+  interval?: Maybe<Scalars['Int']>;
+  data?: Maybe<JobData>;
 }
 
 export interface Query {
    __typename: 'Query';
+  appConfig: AppConfig;
   test?: Maybe<Scalars['String']>;
   buckets: Array<Bucket>;
   bucket?: Maybe<Bucket>;
@@ -194,3 +208,8 @@ export type LoadScrapsQuery = { __typename: 'Query', scraps: Array<(
     { __typename: 'Scrap' }
     & ScrapFieldsFragment
   )> };
+
+export type LoadAppConfigQueryVariables = {};
+
+
+export type LoadAppConfigQuery = { __typename: 'Query', appConfig: { __typename: 'AppConfig', rootPath: string } };
