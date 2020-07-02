@@ -6,7 +6,7 @@ import { treeFromPaths, TreeNode } from 'shared/utils/tree';
 
 import { isRootBucket } from 'core/storage/utils';
 import { Client } from 'core/client/types';
-import { bucketFields, scrapFields, loadBucketQuery } from 'core/client/queries';
+import { bucketFields, scrapFields, loadBucketsQuery } from 'core/client/queries';
 import { StatesForCacheEntities } from 'core/client/cacheEntity';
 import {
   Bucket,
@@ -49,13 +49,11 @@ export class LibraryStore {
     this.scrapStates = new StatesForCacheEntities<Scrap, ScrapState>(() => ({
       expanded: false,
     }));
-
-    this.client.send({ query: `query { appConfig { rootPath }}` }).then((c) => console.log(c));
   }
 
   async loadBuckets(): Promise<void> {
     await this.client.send<LoadBucketsQuery>({
-      query: loadBucketQuery,
+      query: loadBucketsQuery,
     });
   }
 

@@ -182,6 +182,16 @@ export type CreateScrapMutation = { __typename: 'Mutation', createScrap?: Maybe<
     & ScrapFieldsFragment
   )> };
 
+export type JobFieldsFragment = { __typename: 'Job', id: string, status: JobStatus, type: JobType };
+
+export type LoadJobsQueryVariables = {};
+
+
+export type LoadJobsQuery = { __typename: 'Query', jobs?: Maybe<Array<Maybe<(
+    { __typename: 'Job' }
+    & JobFieldsFragment
+  )>>> };
+
 export type CreateBucketMutationVariables = {
   input: CreateBucketInput;
 };

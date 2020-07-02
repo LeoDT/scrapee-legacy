@@ -6,7 +6,7 @@ import { xPathWithWindow } from 'shared/utils/domPath';
 
 import { isRootBucket } from 'core/storage/utils';
 import { Client } from 'core/client/types';
-import { loadBucketQuery, createScrapMutation } from 'core/client/queries';
+import { loadBucketsQuery, createScrapMutation } from 'core/client/queries';
 import {
   ScrapSource,
   Bucket,
@@ -45,7 +45,7 @@ export class Store {
 
   async loadBuckets(): Promise<void> {
     await this.client.send<LoadBucketsQuery>({
-      query: loadBucketQuery,
+      query: loadBucketsQuery,
     });
 
     const root = this.buckets.find((b) => isRootBucket(b.id));

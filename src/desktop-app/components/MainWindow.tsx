@@ -6,8 +6,9 @@ import { useClient } from '../ipcClient';
 import Window from './Window';
 import NavigationBar from './NavigationBar';
 
-import Library from './Library';
 import { MainStore, MainStoreContext } from './store';
+import Library from './Library';
+import Job from './Job';
 
 export default function MainWindow(): JSX.Element {
   const client = useClient();
@@ -33,6 +34,9 @@ export default function MainWindow(): JSX.Element {
               <Switch>
                 <Route path="/library">
                   <Library />
+                </Route>
+                <Route path="/job">
+                  <Job />
                 </Route>
                 <Redirect from="/" to="/library" />
               </Switch>

@@ -31,7 +31,7 @@ export async function initServices(): Promise<Services> {
     graphql: {
       schema: graphQLSchema,
       execute: (request: SerializableGraphQLRequest) =>
-        graphqlExecutor(graphQLSchema, { bucketStorage, jobManager }, request),
+        graphqlExecutor(graphQLSchema, { bucketStorage, jobManager, db }, request),
     },
     db,
     jobManager,

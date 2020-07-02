@@ -55,6 +55,10 @@ export class Collection<TValue extends Node> {
     } as TValue;
   }
 
+  list(): TValue[] {
+    return this.db.prepare(`select * from ${this.table};`).all();
+  }
+
   get(id: string): TValue {
     return this.deserialize(this.db.prepare(`select * from ${this.table} where id = ?;`).get(id));
   }

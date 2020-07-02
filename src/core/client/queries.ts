@@ -31,7 +31,7 @@ export const scrapFields = /* GraphQL */ `
   }
 `;
 
-export const loadBucketQuery = /* GraphQL */ `
+export const loadBucketsQuery = /* GraphQL */ `
   ${bucketFields}
 
   query LoadBucketsQuery {
@@ -47,6 +47,26 @@ export const createScrapMutation = /* GraphQL */ `
   mutation CreateScrapMutation($input: CreateScrapInput!) {
     createScrap(input: $input) {
       ...scrapFields
+    }
+  }
+`;
+
+export const jobFields = /* GraphQL */ `
+  fragment jobFields on Job {
+    __typename
+
+    id
+    status
+    type
+  }
+`;
+
+export const loadJobsQuery = /* GraphQL */ `
+  ${jobFields}
+
+  query LoadJobsQuery {
+    jobs {
+      ...jobFields
     }
   }
 `;

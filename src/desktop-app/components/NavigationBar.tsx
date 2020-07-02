@@ -3,6 +3,7 @@ import { css, cx } from 'emotion';
 import { NavLink } from 'react-router-dom';
 
 import LibraryIcon from '../../assets/icon/library.svg';
+import JobIcon from '../../assets/icon/job.svg';
 
 interface NavigationBarItemProps {
   children: React.ReactNode;
@@ -26,6 +27,9 @@ export default function NavigationBar(): JSX.Element {
     <div className={cx(css({ width: 60 }), 'bg-gray-700 text-white')}>
       <NavigationBarItem to="/library">
         <LibraryIcon className="fill-current" />
+      </NavigationBarItem>
+      <NavigationBarItem to="/job">
+        <JobIcon className="fill-current" />
       </NavigationBarItem>
     </div>
   );
