@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Observer } from 'mobx-react-lite';
 
 import Button from 'shared/components/Button';
 import Toggle from 'shared/components/Toggle';
@@ -7,16 +8,15 @@ import { Dimmer, Dimmable } from 'shared/components/Dimmer';
 import { useDOMInspector, useStore } from './context';
 
 import BucketSelector from './BucketSelector';
-import PreviewHTMLElements from './PreviewHTMLElements';
+import ScrapContent from './ScrapContent';
 
 export default function MainPanel(): JSX.Element {
   const store = useStore();
   const inspector = useDOMInspector();
-  const [selectedEls, setSelectedEls] = React.useState<HTMLElement[]>([]);
   const [inspectorEnabled, setInspectorEnabled] = React.useState(true);
   const [saving, setSaving] = React.useState(false);
   const onSelect = React.useCallback((el: HTMLElement): void => {
-    setSelectedEls((els) => [...els, el]);
+    store.addScrapContent(el);
   }, []);
 
   React.useEffect(() => {
@@ -35,10 +35,10 @@ export default function MainPanel(): JSX.Element {
   }, [inspector, inspectorEnabled, onSelect]);
 
   return (
-    <Dimmable className="main-panel p-2" dimmed={saving}>
+    <Dimmable className="main-panel py-2" dimmed={saving}>
       {saving ? <Dimmer>Saving...</Dimmer> : null}
 
-      <div className="flex items-center">
+      <div className="flex items-center px-2">
         <Toggle
           checked={inspectorEnabled}
           label="Inspector On"
@@ -46,27 +46,37 @@ export default function MainPanel(): JSX.Element {
         />
         <div className="ml-auto">
           <BucketSelector />
-          <Button
-            className="ml-2"
-            disabled={selectedEls.length === 0 || saving}
-            onClick={async () => {
-              setSaving(true);
+          <Observer>
+            {() => (
+              <Button
+                className="ml-2"
+                disabled={store.scrapContents.length === 0 || saving}
+                onClick={async () => {
+                  setSaving(true);
 
-              try {
-                await store.saveScrap(selectedEls);
-
-                setSelectedEls([]);
-              } finally {
-                setSaving(false);
-              }
-            }}
-          >
-            Save!
-          </Button>
+                  try {
+                    await store.saveScrap();
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+              >
+                Save!
+              </Button>
+            )}
+          </Observer>
         </div>
       </div>
 
-      {selectedEls.length ? <PreviewHTMLElements els={selectedEls} /> : null}
+      <Observer>
+        {() => (
+          <div className="overflow-auto mt-2" style={{ maxHeight: 400 }}>
+            {store.scrapContents.map((s, i) => (
+              <ScrapContent scrapContent={s} index={i} key={s.key || i} />
+            ))}
+          </div>
+        )}
+      </Observer>
     </Dimmable>
   );
 }

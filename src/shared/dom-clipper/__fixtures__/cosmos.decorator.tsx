@@ -1,29 +1,33 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react';
+
 import { Store } from '../store';
 import { StoreContext } from '../context';
-import { Bucket } from '../../models/Bucket';
-import { success } from '../../utils/localMessage';
+import { Cache } from 'core/client/cache';
+import { Client, ClientResult } from 'core/client/types';
 
 function delayedValue<T>(v: T): Promise<T> {
-  return new Promise(resolve => setTimeout(() => resolve(v), 500));
+  return new Promise((resolve) => setTimeout(() => resolve(v), 500));
 }
 
-const store = new Store({
-  async init() {
-    return {};
+const client: Client = {
+  cache: new Cache(),
+  send<T extends any>(r: any): Promise<ClientResult<T>> {
+    if (r) {
+      return delayedValue({
+        success: true,
+        data: {} as T,
+      });
+    } else {
+      return delayedValue({
+        success: false,
+        errors: [],
+      });
+    }
   },
-  async loadBuckets() {
-    return {
-      buckets: [
-        new Bucket('/Users/LeoDT/tmp/scrapee/buckets/bucket1', 'bucket1'),
-        new Bucket('/Users/LeoDT/tmp/scrapee/buckets/bucket2', 'bucket2')
-      ]
-    };
-  },
-  async saveScrap() {
-    return delayedValue(success());
-  }
-});
+};
+
+const store = new Store(client);
 
 store.loadBuckets();
 
@@ -43,7 +47,7 @@ export default function CosmosDecorator({ children }: { children: React.ReactNod
               Learn UI design, from the creators of Tailwind CSS.
               </a></p> <div><a href="https://refactoringui.com/book?utm_source=tailwindcss&amp;utm_medium=sidebar-widget">
                 Learn more →
-              </a></div></div></div></div></div></div></div>`
+              </a></div></div></div></div></div></div></div>`,
         }}
       />
       <StoreContext.Provider value={store}>{children}</StoreContext.Provider>

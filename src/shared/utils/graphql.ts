@@ -7,6 +7,8 @@ import {
   GraphQLObjectType,
   GraphQLScalarType,
   Kind,
+  getOperationAST,
+  parse,
 } from 'graphql';
 
 import { DateTime as LuxonDateTime } from 'luxon';
@@ -19,7 +21,9 @@ const coerceIntString = (value: number | string): number | string => {
   if (Number.isInteger(value)) {
     if (value < MIN_INT || value > MAX_INT) {
       throw new TypeError(
-        `Value is integer but outside of valid range for 32-bit signed integer: ${String(value)}`
+        `Value is integer but outside of valid range for 32-bit signed integer: ${String(
+          value
+        )}`
       );
     }
 
@@ -100,4 +104,10 @@ export function parseValue<T>(value: any, type: GraphQLObjectType): T {
 
     return v;
   });
+}
+
+export function isASubscriptionOperation(query: string): boolean {
+  const operationAST = getOperationAST(parse(query), null);
+
+  return !!operationAST && operationAST.operation === 'subscription';
 }

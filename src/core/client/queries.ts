@@ -41,6 +41,12 @@ export const loadBucketsQuery = /* GraphQL */ `
   }
 `;
 
+export const subscribeBucketsUpdate = /* GraphQL */ `
+  subscription SubscribeBucketsUpdate {
+    bucketsUpdate
+  }
+`;
+
 export const createScrapMutation = /* GraphQL */ `
   ${scrapFields}
 

@@ -17,7 +17,7 @@ export const resolvers: Resolvers = {
         source,
         sourceUrl,
         createdAt,
-        content: content.map((c, i) => ({ ...c, key: c.key || i })),
+        content: content.map((c, i) => ({ ...c, key: c.key || i + 1 })),
       };
 
       const scrap = await bucketStorage.createScrapFromJSON(scrapJSON, bucketId);

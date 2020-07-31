@@ -1,6 +1,13 @@
 import { Resolvers } from '../server-types';
 
 export const resolvers: Resolvers = {
+  Subscription: {
+    bucketsUpdate: {
+      subscribe(_1, _2, { pubsub }) {
+        return pubsub.asyncIterator('bucketsUpdate');
+      },
+    },
+  },
   Query: {
     async buckets(_1, _2, { bucketStorage }) {
       return (await bucketStorage.showAllBuckets()).map((id) => ({

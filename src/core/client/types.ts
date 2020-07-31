@@ -19,6 +19,13 @@ export interface Client {
   send: <TResponse = any, TVariables = Record<string, any>>(
     r: SerializableGraphQLRequest<TVariables>
   ) => Promise<ClientResult<TResponse>>;
+  subscribe: <TResponse = any, TVariables = Record<string, any>>(
+    r: SerializableGraphQLRequest<TVariables>,
+    onData?: (
+      v?: ClientResult<TResponse> | PromiseLike<ClientResult<TResponse>>
+    ) => void,
+    onError?: (v?: ClientFailResult) => void
+  ) => () => void;
   cache: Cache;
 }
 

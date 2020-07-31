@@ -164,6 +164,12 @@ export interface MutationCreateScrapArgs {
   input: CreateScrapInput;
 }
 
+export interface Subscription {
+   __typename?: 'Subscription';
+  bucketsUpdate: Scalars['DateTime'];
+  bucketUpdate: Bucket;
+}
+
 export type WithIndex<TObject> = TObject & Record<string, any>;
 export type ResolversObject<TObject> = WithIndex<TObject>;
 
@@ -263,6 +269,7 @@ export type ResolversTypes = ResolversObject<{
   Int: ResolverTypeWrapper<Scalars['Int']>,
   Query: ResolverTypeWrapper<{}>,
   Mutation: ResolverTypeWrapper<{}>,
+  Subscription: ResolverTypeWrapper<{}>,
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -292,6 +299,7 @@ export type ResolversParentTypes = ResolversObject<{
   Int: Scalars['Int'],
   Query: {},
   Mutation: {},
+  Subscription: {},
 }>;
 
 export interface IntStringScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['IntString'], any> {
@@ -377,6 +385,11 @@ export type MutationResolvers<ContextType = GraphQLServerContext, ParentType ext
   createScrap?: Resolver<Maybe<ResolversTypes['Scrap']>, ParentType, ContextType, RequireFields<MutationCreateScrapArgs, 'input'>>,
 }>;
 
+export type SubscriptionResolvers<ContextType = GraphQLServerContext, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = ResolversObject<{
+  bucketsUpdate?: SubscriptionResolver<ResolversTypes['DateTime'], "bucketsUpdate", ParentType, ContextType>,
+  bucketUpdate?: SubscriptionResolver<ResolversTypes['Bucket'], "bucketUpdate", ParentType, ContextType>,
+}>;
+
 export type Resolvers<ContextType = GraphQLServerContext> = ResolversObject<{
   IntString?: GraphQLScalarType,
   DateTime?: GraphQLScalarType,
@@ -391,6 +404,7 @@ export type Resolvers<ContextType = GraphQLServerContext> = ResolversObject<{
   Job?: JobResolvers<ContextType>,
   Query?: QueryResolvers<ContextType>,
   Mutation?: MutationResolvers<ContextType>,
+  Subscription?: SubscriptionResolvers<ContextType>,
 }>;
 
 

@@ -160,6 +160,12 @@ export interface MutationCreateScrapArgs {
   input: CreateScrapInput;
 }
 
+export interface Subscription {
+   __typename: 'Subscription';
+  bucketsUpdate: Scalars['DateTime'];
+  bucketUpdate: Bucket;
+}
+
 export type BucketFieldsFragment = { __typename: 'Bucket', id: string };
 
 export type ScrapFieldsFragment = { __typename: 'Scrap', id: string, bucketId: string, title?: Maybe<string>, source?: Maybe<ScrapSource>, sourceUrl?: Maybe<string>, createdAt: DateTime, content: Array<{ __typename: 'ScrapContent', key: number | string, type: ScrapType, value: string, originalHTML?: Maybe<string>, xPath?: Maybe<string> }> };
@@ -171,6 +177,11 @@ export type LoadBucketsQuery = { __typename: 'Query', buckets: Array<(
     { __typename: 'Bucket' }
     & BucketFieldsFragment
   )> };
+
+export type SubscribeBucketsUpdateSubscriptionVariables = {};
+
+
+export type SubscribeBucketsUpdateSubscription = { __typename: 'Subscription', bucketsUpdate: DateTime };
 
 export type CreateScrapMutationVariables = {
   input: CreateScrapInput;

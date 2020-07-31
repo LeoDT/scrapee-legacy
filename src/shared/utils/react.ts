@@ -15,3 +15,34 @@ export function createContextNoNullCheck<T>(defaults?: T): [() => T, React.Conte
 
   return [useContext, context];
 }
+
+export function useTextSizer(text: string): [number, JSX.Element] {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [size, setSize] = React.useState(0);
+
+  React.useEffect(() => {
+    if (ref.current) {
+      setSize(ref.current.scrollWidth + 2);
+    }
+  }, [text]);
+
+  return [
+    size,
+    React.createElement(
+      'div',
+      {
+        ref,
+        style: {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          visibility: 'hidden',
+          height: 0,
+          overflow: 'scroll',
+          whiteSpace: 'pre',
+        },
+      },
+      text
+    ),
+  ];
+}

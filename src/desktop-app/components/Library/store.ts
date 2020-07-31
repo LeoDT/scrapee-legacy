@@ -6,7 +6,12 @@ import { treeFromPaths, TreeNode } from 'shared/utils/tree';
 
 import { isRootBucket } from 'core/storage/utils';
 import { Client } from 'core/client/types';
-import { bucketFields, scrapFields, loadBucketsQuery } from 'core/client/queries';
+import {
+  bucketFields,
+  scrapFields,
+  loadBucketsQuery,
+  subscribeBucketsUpdate,
+} from 'core/client/queries';
 import { StatesForCacheEntities } from 'core/client/cacheEntity';
 import {
   Bucket,
@@ -33,22 +38,42 @@ export class LibraryStore {
   bucketStates: StatesForCacheEntities<Bucket, BucketState>;
   scrapStates: StatesForCacheEntities<Scrap, ScrapState>;
 
+  subscriptionDisposers: Array<() => void>;
+
   constructor(client: Client) {
+    this.subscriptionDisposers = [];
     this.client = client;
 
-    this.bucketStates = new StatesForCacheEntities<Bucket, BucketState>((b) => ({
-      expanded: false,
-      get isRoot() {
-        return isRootBucket(b.id);
-      },
-      get name() {
-        return basename(b.id);
-      },
-    }));
+    this.bucketStates = new StatesForCacheEntities<Bucket, BucketState>(
+      (b) => ({
+        expanded: false,
+        get isRoot() {
+          return isRootBucket(b.id);
+        },
+        get name() {
+          return basename(b.id);
+        },
+      })
+    );
 
     this.scrapStates = new StatesForCacheEntities<Scrap, ScrapState>(() => ({
       expanded: false,
     }));
+
+    this.subscriptionDisposers.push(
+      this.client.subscribe(
+        {
+          query: subscribeBucketsUpdate,
+        },
+        () => {
+          this.loadBuckets();
+        }
+      )
+    );
+
+    window.addEventListener('unload', () => {
+      this.subscriptionDisposers.forEach((d) => d());
+    });
   }
 
   async loadBuckets(): Promise<void> {
@@ -58,20 +83,22 @@ export class LibraryStore {
   }
 
   async createBucket(name: string, parent: Bucket): Promise<void> {
-    await this.client.send<CreateBucketMutation, CreateBucketMutationVariables>({
-      query: /* GraphQL */ `
-        ${bucketFields}
+    await this.client.send<CreateBucketMutation, CreateBucketMutationVariables>(
+      {
+        query: /* GraphQL */ `
+          ${bucketFields}
 
-        mutation CreateBucketMutation($input: CreateBucketInput!) {
-          createBucket(input: $input) {
-            ...bucketFields
+          mutation CreateBucketMutation($input: CreateBucketInput!) {
+            createBucket(input: $input) {
+              ...bucketFields
+            }
           }
-        }
-      `,
-      variables: {
-        input: { id: name, parentId: parent.id },
-      },
-    });
+        `,
+        variables: {
+          input: { id: name, parentId: parent.id },
+        },
+      }
+    );
   }
 
   async trashBucket(b: Bucket): Promise<void> {
@@ -112,7 +139,9 @@ export class LibraryStore {
     return this.client.cache.readAll<Bucket>('Bucket');
   }
   get bucketTree(): TreeNode<Bucket> | null {
-    return this.buckets.length ? treeFromPaths(this.buckets, (b) => b.id) : null;
+    return this.buckets.length
+      ? treeFromPaths(this.buckets, (b) => b.id)
+      : null;
   }
 
   selectedBucketId = '';
@@ -150,4 +179,6 @@ decorate(LibraryStore, {
   toggleBucket: action,
 });
 
-export const [useLibraryStore, LibraryStoreContext] = createContextNoNullCheck<LibraryStore>();
+export const [useLibraryStore, LibraryStoreContext] = createContextNoNullCheck<
+  LibraryStore
+>();

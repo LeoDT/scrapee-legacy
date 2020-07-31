@@ -8,8 +8,11 @@ const logger = winston.createLogger({
   level: 'info',
   format: winston.format.simple(),
   transports: [
-    new winston.transports.File({ filename: '/Users/Leodt/out.log', handleExceptions: true })
-  ]
+    new winston.transports.File({
+      filename: '/Users/Leodt/out.log',
+      handleExceptions: true,
+    }),
+  ],
 });
 
 function sendToChrome(b: Buffer): void {
@@ -36,7 +39,7 @@ function sendToNative(s: string): net.Socket {
       socket.end();
     });
 
-    socket.on('data', b => {
+    socket.on('data', (b) => {
       input = Buffer.concat([input, Buffer.from(b)]);
     });
 
@@ -55,7 +58,7 @@ function receiveFromChrome(): void {
 
   logger.info('receiving');
 
-  stdin.on('data', b => {
+  stdin.on('data', (b) => {
     input = Buffer.concat([input, b]);
 
     if (!len) {
@@ -82,7 +85,9 @@ function receiveFromChrome(): void {
         len = 0;
 
         socket.on('close', () => {
-          logger.info('last send to native finished, receiving new from chrome');
+          logger.info(
+            'last send to native finished, receiving new from chrome'
+          );
           stdin.resume();
         });
       }

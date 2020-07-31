@@ -26,11 +26,11 @@ export class BaseStorage {
     this.rootRegex = new RegExp(`^${this.root}/?`);
   }
 
-  private resolve(p: string): string {
+  resolve(p: string): string {
     return path.resolve(this.root, p);
   }
 
-  private unresolve(p: string): string {
+  unresolve(p: string): string {
     return p.replace(this.rootRegex, '');
   }
 
@@ -122,7 +122,10 @@ export class BaseStorage {
     return this.unresolve(fullPath);
   }
 
-  async createScrapFromJSON(json: Record<string, unknown>, parent: string): Promise<BaseScrap> {
+  async createScrapFromJSON(
+    json: Record<string, unknown>,
+    parent: string
+  ): Promise<BaseScrap> {
     const id = path.join(parent, `scrap.${uuid.generate()}.json`);
     const scrap = { ...json, id } as Scrap;
     const fullPath = this.resolve(id);
@@ -133,7 +136,10 @@ export class BaseStorage {
     return scrap;
   }
 
-  async updateScrap(scrapId: string, update: Record<string, unknown>): Promise<BaseScrap> {
+  async updateScrap(
+    scrapId: string,
+    update: Record<string, unknown>
+  ): Promise<BaseScrap> {
     const fullPath = this.resolve(scrapId);
 
     const scrap = await this.readScrap(fullPath);
@@ -144,7 +150,10 @@ export class BaseStorage {
 
   async move(src: string, dst: string, overwrite = false): Promise<void> {
     const srcFullPath = this.resolve(src);
-    const dstFullPath = path.resolve(this.resolve(dst), path.basename(srcFullPath));
+    const dstFullPath = path.resolve(
+      this.resolve(dst),
+      path.basename(srcFullPath)
+    );
 
     await fsExtra.move(srcFullPath, dstFullPath, {
       overwrite,

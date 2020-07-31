@@ -121,7 +121,13 @@ type Mutation {
   createScrap(input: CreateScrapInput!): Scrap
 }
 
+type Subscription {
+  bucketsUpdate: DateTime!
+  bucketUpdate: Bucket!
+}
+
 schema {
   query: Query
   mutation: Mutation
+  subscription: Subscription
 }

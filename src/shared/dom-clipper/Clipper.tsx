@@ -23,7 +23,7 @@ export default function Clipper({ ignoreRoot }: Props): JSX.Element {
 
   React.useEffect(() => {
     inspector.updateOptions({
-      ignoreRoots: compact<HTMLElement>([bodyHeightPlaceHolder, ignoreRoot ?? rootRef.current])
+      ignoreRoots: compact<HTMLElement>([bodyHeightPlaceHolder, ignoreRoot ?? rootRef.current]),
     });
   }, []);
 
@@ -50,7 +50,7 @@ export default function Clipper({ ignoreRoot }: Props): JSX.Element {
         <style type="text/css">{styles}</style>
         <div
           ref={panelRef}
-          className="clipper fixed left-0 bottom-0 w-full bg-gray-100 border-t shadow-inner shadow-xs"
+          className="clipper fixed left-0 bottom-0 w-full bg-gray-100 border-t shadow-xs"
           style={{ zIndex: 2147483637 }}
         >
           <MainPanel />

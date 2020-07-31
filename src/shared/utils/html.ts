@@ -105,7 +105,7 @@ interface SanitizeHTMLOptions {
   absolutifyURLs?: boolean;
 }
 
-function shouldBeRejected(el: Element): boolean {
+function shouldElementBeRejected(el: Element): boolean {
   const style = getComputedStyle(el);
   const tagName = el.tagName.toLowerCase();
 
@@ -119,17 +119,18 @@ function shouldBeRejected(el: Element): boolean {
   );
 }
 
+function shouldNodeBeRejected(node: Node): boolean {
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    return shouldElementBeRejected(node as Element);
+  }
+
+  return node.nodeType !== Node.ELEMENT_NODE && node.nodeType !== Node.TEXT_NODE;
+}
+
 function createTreeWalker(root: Element): TreeWalker {
   return document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
-    acceptNode: (node) => {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        return shouldBeRejected(node as Element)
-          ? NodeFilter.FILTER_REJECT
-          : NodeFilter.FILTER_ACCEPT;
-      }
-
-      return NodeFilter.FILTER_ACCEPT;
-    },
+    acceptNode: (node) =>
+      shouldNodeBeRejected(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT,
   });
 }
 
@@ -175,6 +176,16 @@ function cleanImportNode(options?: SanitizeHTMLOptions): (el: Element, deep?: bo
   };
 }
 
+function getAcceptedPreviousSibling(node: Node): Node | null {
+  let p = node.previousSibling;
+
+  while (p && shouldNodeBeRejected(p)) {
+    p = p.previousSibling;
+  }
+
+  return p;
+}
+
 export function sanitizeHTMLElement(root: Element, options?: SanitizeHTMLOptions): string {
   if (process.env.NODE_ENV === 'development') {
     console.time('sanitize html element');
@@ -200,7 +211,7 @@ export function sanitizeHTMLElement(root: Element, options?: SanitizeHTMLOptions
     function check(): boolean {
       if (src.parentNode === lastSrc) {
         lastDst.appendChild(dst);
-      } else if (src.previousSibling === lastSrc) {
+      } else if (getAcceptedPreviousSibling(src) === lastSrc) {
         lastDst.parentNode?.appendChild(dst);
       } else {
         return false;

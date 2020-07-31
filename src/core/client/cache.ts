@@ -4,7 +4,11 @@ import { each } from 'lodash';
 import { ObservableMap, observable, action, decorate } from 'mobx';
 import { GraphQLSchema, GraphQLObjectType } from 'graphql';
 
-import { getActualType, isTypeImplementNode, parseValue } from 'shared/utils/graphql';
+import {
+  getActualType,
+  isTypeImplementNode,
+  parseValue,
+} from 'shared/utils/graphql';
 import { createContextNoNullCheck } from 'shared/utils/react';
 
 export type CacheEntityID = string | number;
@@ -117,6 +121,8 @@ export function writeCacheWithGraphQLSchema(
     let field = schema.getQueryType()?.getFields()?.[k];
 
     if (!field) field = schema.getMutationType()?.getFields()?.[k];
+
+    if (!field) field = schema.getSubscriptionType()?.getFields()?.[k];
 
     if (field) {
       const type = getActualType(field.type);

@@ -1,4 +1,4 @@
-import { computed, decorate, observable } from 'mobx';
+import { computed, decorate, observable, IObservableArray } from 'mobx';
 import { DateTime } from 'luxon';
 
 import { sanitizeHTMLElement } from 'shared/utils/html';
@@ -12,12 +12,14 @@ import {
   Bucket,
   LoadBucketsQuery,
   ScrapType,
+  ScrapContentInput,
   CreateScrapMutation,
   CreateScrapMutationVariables,
 } from 'core/client-types';
 
 export class Store {
   client: Client;
+  xPath: ReturnType<typeof xPathWithWindow>;
 
   selectedBucket: Bucket | null;
 
@@ -25,6 +27,8 @@ export class Store {
     this.client = client;
 
     this.selectedBucket = null;
+
+    this.xPath = xPathWithWindow(window.Node);
   }
 
   get buckets(): Bucket[] {
@@ -55,21 +59,30 @@ export class Store {
     }
   }
 
-  async saveScrap(els: HTMLElement[]): Promise<void> {
+  scrapContents: IObservableArray<ScrapContentInput> = observable.array([]);
+
+  addScrapContent(el: HTMLElement): ScrapContentInput {
+    const scrapContent: ScrapContentInput = {
+      type: ScrapType.Text,
+      value: sanitizeHTMLElement(el, { absolutifyURLs: true }),
+      originalHTML: el.outerHTML,
+      xPath: this.xPath(el),
+    };
+
+    this.scrapContents.push(scrapContent);
+
+    return scrapContent;
+  }
+
+  async saveScrap(): Promise<void> {
     if (!this.selectedBucket) return;
 
-    const xPath = xPathWithWindow(window.Node);
     const input = {
       bucketId: this.selectedBucket.id,
       title: document.title,
       source: ScrapSource.Clipper,
       sourceUrl: location.href,
-      content: els.map((el) => ({
-        type: ScrapType.Text,
-        value: sanitizeHTMLElement(el, { absolutifyURLs: true }),
-        originalHTML: el.outerHTML,
-        xPath: xPath(el),
-      })),
+      content: this.scrapContents,
       createdAt: DateTime.local(),
     };
 
@@ -77,6 +90,8 @@ export class Store {
       query: createScrapMutation,
       variables: { input },
     });
+
+    this.scrapContents.replace([]);
   }
 }
 
